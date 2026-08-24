@@ -190,7 +190,6 @@ class _FeatureList extends StatelessWidget {
       ('📖', '全ステージ（4・5）無制限アクセス'),
       ('🏅', 'プレミアムバッジコレクション'),
       ('📊', '詳細な学習レポート（coming soon）'),
-      ('🤖', 'AI作文採点（coming soon）'),
       ('👨‍👩‍👧', '保護者ダッシュボード（coming soon）'),
     ];
 
