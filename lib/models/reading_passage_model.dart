@@ -4,6 +4,7 @@ part 'reading_passage_model.freezed.dart';
 
 part 'reading_passage_model.g.dart';
 
+@JsonSerializable()
 @freezed
 class ReadingPassage with _$ReadingPassage {
   const factory ReadingPassage({
@@ -23,6 +24,7 @@ class ReadingPassage with _$ReadingPassage {
       _$ReadingPassageFromJson(json);
 }
 
+@JsonSerializable()
 @freezed
 class ComprehensionQuestion with _$ComprehensionQuestion {
   const factory ComprehensionQuestion({
@@ -40,6 +42,7 @@ class ComprehensionQuestion with _$ComprehensionQuestion {
       _$ComprehensionQuestionFromJson(json);
 }
 
+@JsonSerializable()
 @freezed
 class ReadingSession with _$ReadingSession {
   const factory ReadingSession({
@@ -59,6 +62,7 @@ class ReadingSession with _$ReadingSession {
       _$ReadingSessionFromJson(json);
 }
 
+@JsonSerializable()
 @freezed
 class ReadingAnalytics with _$ReadingAnalytics {
   const factory ReadingAnalytics({
@@ -75,6 +79,7 @@ class ReadingAnalytics with _$ReadingAnalytics {
       _$ReadingAnalyticsFromJson(json);
 }
 
+@JsonSerializable()
 @freezed
 class SummaryQuestionSet with _$SummaryQuestionSet {
   const factory SummaryQuestionSet({
@@ -89,6 +94,7 @@ class SummaryQuestionSet with _$SummaryQuestionSet {
       _$SummaryQuestionSetFromJson(json);
 }
 
+@JsonSerializable()
 @freezed
 class ExpressionQuestion with _$ExpressionQuestion {
   const factory ExpressionQuestion({
@@ -104,6 +110,7 @@ class ExpressionQuestion with _$ExpressionQuestion {
       _$ExpressionQuestionFromJson(json);
 }
 
+@JsonSerializable()
 @freezed
 class TextStructureAnalysis with _$TextStructureAnalysis {
   const factory TextStructureAnalysis({
