@@ -3,7 +3,7 @@ name: Build Android APK
 on:
   push:
     branches:
-      - 'claude/continuation-session-*'
+      - 'claude/**'
       - 'main'
     tags:
       - 'v*'
@@ -41,6 +41,8 @@ jobs:
       - name: Clean and get dependencies
         run: |
           flutter clean
+          rm -f pubspec.lock
+          rm -rf .dart_tool/
           flutter pub get
 
       - name: Generate code (build_runner)
