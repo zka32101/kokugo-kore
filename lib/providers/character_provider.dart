@@ -8,18 +8,15 @@ import '../data/kokugo_characters.dart';
 
 import '../models/character_model.dart';
 
-// ─── Phase 4.1: CharacterProfile統合版 ────────────────────────────────────
+// ─── Phase 4.1: Character統合版 ────────────────────────────────────
 
-/// 国語コレ固有のキャラクターノティファイア（Phase 4.1: CharacterProfile対応）
-class CharacterNotifier extends BaseCharacterProfileNotifier {
+/// 国語コレ固有のキャラクターノティファイア（shared_core BaseCharacterNotifier を実装）
+class CharacterNotifier extends BaseCharacterNotifier {
   @override
   List<BaseCharacter> get characterList => kKokugoCharacters;
 
   @override
   String get storageKey => 'kokugo_character_profiles'; // Phase 4.1: 統一フォーマット
-
-  @override
-  Subject get appSubject => Subject.kokugo;
 }
 
 /// 統一キャラクタープロバイダー（Phase 4.1）

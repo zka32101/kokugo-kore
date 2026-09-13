@@ -1,4 +1,4 @@
-import 'package:shared_core/models/badge_model.dart';
+import 'package:shared_core/models/badge_model.dart' show BadgeRarity;
 import '../models/badge_progress_model.dart';
 
 import '../models/badge_reward_model.dart';
