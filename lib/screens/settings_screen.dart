@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_core/shared_core.dart'
     show
+        AnalyticsDashboardWidget,
+        AccuracyTrendData,
+        AddFriendDialog,
         CrossPromoSection,
+        DailyActivityData,
         FeedbackFormPage,
         NotificationSettingsPage,
         requireParentalGate,
         RetentionDashboard,
-        ScreenTimeSettingsWidget,
-        AddFriendDialog;
+        ScreenTimeSettingsWidget;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../data/kana_data.dart';
@@ -97,11 +100,30 @@ Future<void> _openScreenTimeSettings(BuildContext context) async {
   );
 }
 
-class SettingsScreen extends ConsumerWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends ConsumerState<SettingsScreen> with TickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final progress = ref.watch(progressProvider);
     final premium = ref.watch(premiumProvider);
     final soundEnabled = ref.watch(soundProvider);
@@ -138,8 +160,18 @@ class SettingsScreen extends ConsumerWidget {
         title: const Text('せってい'),
         backgroundColor: kPrimaryColor,
         automaticallyImplyLeading: false,
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: '設定'),
+            Tab(text: '学習分析'),
+          ],
+        ),
       ),
-      body: ListView(
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          ListView(
         children: [
           if (!premium.isPremium) _PremiumBanner(premium: premium),
           _SectionHeader(title: 'おと・サウンド'),
@@ -404,8 +436,42 @@ class SettingsScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 80),
         ],
+          // Tab 2: 学習分析
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: AnalyticsDashboardWidget(
+              userName: currentProfile?.name ?? 'ユーザー',
+              totalQuestions: progress.totalQuestionsAnswered ?? 0,
+              averageAccuracy: progress.averageAccuracy ?? 0.0,
+              totalTimeSpent: progress.totalLearningSeconds ?? 0,
+              dailyActivity: _generateDailyActivity(),
+              accuracyTrend: _generateAccuracyTrend(),
+            ),
+          ),
+        ],
       ),
     );
+  }
+
+  List<DailyActivityData> _generateDailyActivity() {
+    return [
+      DailyActivityData(day: '月', count: 0),
+      DailyActivityData(day: '火', count: 0),
+      DailyActivityData(day: '水', count: 0),
+      DailyActivityData(day: '木', count: 0),
+      DailyActivityData(day: '金', count: 0),
+      DailyActivityData(day: '土', count: 0),
+      DailyActivityData(day: '日', count: 0),
+    ];
+  }
+
+  List<AccuracyTrendData> _generateAccuracyTrend() {
+    return [
+      AccuracyTrendData(week: 'W1', accuracy: 0.0),
+      AccuracyTrendData(week: 'W2', accuracy: 0.0),
+      AccuracyTrendData(week: 'W3', accuracy: 0.0),
+      AccuracyTrendData(week: 'W4', accuracy: 0.0),
+    ];
   }
 
   void _showUsageGuide(BuildContext context) {
