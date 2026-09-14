@@ -4,6 +4,7 @@ part 'battle_model.freezed.dart';
 
 part 'battle_model.g.dart';
 
+@JsonSerializable()
 @freezed
 class Battle with _$Battle {
   const factory Battle({
@@ -25,6 +26,7 @@ class Battle with _$Battle {
   factory Battle.fromJson(Map<String, dynamic> json) => _$BattleFromJson(json);
 }
 
+@JsonSerializable()
 @freezed
 class BattleRound with _$BattleRound {
   const factory BattleRound({
@@ -46,6 +48,7 @@ class BattleRound with _$BattleRound {
       _$BattleRoundFromJson(json);
 }
 
+@JsonSerializable()
 @freezed
 class BattleResult with _$BattleResult {
   const factory BattleResult({
@@ -64,6 +67,7 @@ class BattleResult with _$BattleResult {
       _$BattleResultFromJson(json);
 }
 
+@JsonSerializable()
 @freezed
 class BattlePlayer with _$BattlePlayer {
   const factory BattlePlayer({
