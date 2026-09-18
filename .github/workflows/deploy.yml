@@ -111,7 +111,7 @@ jobs:
           }
         shell: powershell
 
-      - name: Map K: drive (Japanese path workaround)
+      - name: "Map K: drive (Japanese path workaround)"
         run: |
           $projectPath = "${{ github.workspace }}"
           subst K: $projectPath
@@ -155,7 +155,7 @@ jobs:
           Write-Host "✓ Debug APK built"
         shell: powershell
 
-      - name: Unmount K: drive
+      - name: "Unmount K: drive"
         if: always()
         run: |
           subst K: /d
