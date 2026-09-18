@@ -87,7 +87,7 @@ jobs:
           }
         shell: powershell
 
-      - name: Map K: drive (Japanese path workaround)
+      - name: "Map K: drive (Japanese path workaround)"
         run: |
           $projectPath = "${{ github.workspace }}"
           subst K: $projectPath
@@ -133,7 +133,7 @@ jobs:
         run: Remove-Item -Path "$env:RUNNER_TEMP\play-console-sa-key.json" -ErrorAction SilentlyContinue
         shell: powershell
 
-      - name: Unmount K: drive
+      - name: "Unmount K: drive"
         if: always()
         run: |
           subst K: /d
