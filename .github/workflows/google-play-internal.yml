@@ -70,9 +70,16 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
           JAVA_HOME: ${{ env.JAVA_HOME }}
+          ADMOB_APP_ID_ANDROID: ${{ secrets.ADMOB_APP_ID_ANDROID }}
+          REVENUE_CAT_API_KEY: ${{ secrets.REVENUE_CAT_API_KEY }}
+          ADMOB_BANNER_ID: ${{ secrets.ADMOB_BANNER_ID }}
+          ADMOB_INTERSTITIAL_ID: ${{ secrets.ADMOB_INTERSTITIAL_ID }}
         run: |
           cd K:/
-          flutter build appbundle --release --no-pub
+          flutter build appbundle --release --no-pub `
+            --dart-define=REVENUE_CAT_API_KEY=$env:REVENUE_CAT_API_KEY `
+            --dart-define=ADMOB_BANNER_ID=$env:ADMOB_BANNER_ID `
+            --dart-define=ADMOB_INTERSTITIAL_ID=$env:ADMOB_INTERSTITIAL_ID
           Write-Host "✓ Release AAB build completed"
         shell: powershell
 
