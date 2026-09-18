@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'screens/splash_screen.dart';
+import 'services/ad_service.dart';
+import 'services/revenue_cat_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
@@ -14,7 +16,19 @@ void main() async {
   } catch (e) {
     debugPrint('Firebase init failed: $e');
   }
-  
+
+  try {
+    await AdService.initialize();
+  } catch (e) {
+    debugPrint('AdMob init failed: $e');
+  }
+
+  try {
+    await RevenueCatService().initialize();
+  } catch (e) {
+    debugPrint('RevenueCat init failed: $e');
+  }
+
   runApp(
     const ProviderScope(
       child: KokugoKoreApp(),
