@@ -4,9 +4,8 @@ part 'reading_passage_model.freezed.dart';
 
 part 'reading_passage_model.g.dart';
 
-@JsonSerializable()
 @freezed
-class ReadingPassage with _$ReadingPassage {
+abstract class ReadingPassage with _$ReadingPassage {
   const factory ReadingPassage({
     required String passageId,
     required String title,
@@ -24,9 +23,8 @@ class ReadingPassage with _$ReadingPassage {
       _$ReadingPassageFromJson(json);
 }
 
-@JsonSerializable()
 @freezed
-class ComprehensionQuestion with _$ComprehensionQuestion {
+abstract class ComprehensionQuestion with _$ComprehensionQuestion {
   const factory ComprehensionQuestion({
     required String questionId,
     required String passageId,
@@ -42,9 +40,8 @@ class ComprehensionQuestion with _$ComprehensionQuestion {
       _$ComprehensionQuestionFromJson(json);
 }
 
-@JsonSerializable()
 @freezed
-class ReadingSession with _$ReadingSession {
+abstract class ReadingSession with _$ReadingSession {
   const factory ReadingSession({
     required String sessionId,
     required String userId,
@@ -62,9 +59,8 @@ class ReadingSession with _$ReadingSession {
       _$ReadingSessionFromJson(json);
 }
 
-@JsonSerializable()
 @freezed
-class ReadingAnalytics with _$ReadingAnalytics {
+abstract class ReadingAnalytics with _$ReadingAnalytics {
   const factory ReadingAnalytics({
     required String userId,
     required int totalPassagesRead,
@@ -79,9 +75,8 @@ class ReadingAnalytics with _$ReadingAnalytics {
       _$ReadingAnalyticsFromJson(json);
 }
 
-@JsonSerializable()
 @freezed
-class SummaryQuestionSet with _$SummaryQuestionSet {
+abstract class SummaryQuestionSet with _$SummaryQuestionSet {
   const factory SummaryQuestionSet({
     required String setId,
     required String passageId,
@@ -94,9 +89,8 @@ class SummaryQuestionSet with _$SummaryQuestionSet {
       _$SummaryQuestionSetFromJson(json);
 }
 
-@JsonSerializable()
 @freezed
-class ExpressionQuestion with _$ExpressionQuestion {
+abstract class ExpressionQuestion with _$ExpressionQuestion {
   const factory ExpressionQuestion({
     required String questionId,
     required String passageId,
@@ -110,9 +104,8 @@ class ExpressionQuestion with _$ExpressionQuestion {
       _$ExpressionQuestionFromJson(json);
 }
 
-@JsonSerializable()
 @freezed
-class TextStructureAnalysis with _$TextStructureAnalysis {
+abstract class TextStructureAnalysis with _$TextStructureAnalysis {
   const factory TextStructureAnalysis({
     required String analysisId,
     required String passageId,

@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_core/shared_core.dart'
     show
-        AnalyticsDashboardWidget,
-        AccuracyTrendData,
+        AnalyticsDashboard,
         AddFriendDialog,
         CrossPromoSection,
-        DailyActivityData,
         FeedbackFormPage,
         NotificationSettingsPage,
         requireParentalGate,
@@ -436,42 +434,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> with TickerProv
           ),
           const SizedBox(height: 80),
         ],
+          ),
           // Tab 2: 学習分析
           SingleChildScrollView(
             padding: const EdgeInsets.all(16),
-            child: AnalyticsDashboardWidget(
-              userName: currentProfile?.name ?? 'ユーザー',
-              totalQuestions: progress.totalQuestionsAnswered ?? 0,
-              averageAccuracy: progress.averageAccuracy ?? 0.0,
-              totalTimeSpent: progress.totalLearningSeconds ?? 0,
-              dailyActivity: _generateDailyActivity(),
-              accuracyTrend: _generateAccuracyTrend(),
+            child: AnalyticsDashboard(
+              userId: currentProfile?.id ??
+                  FirebaseAuth.instance.currentUser?.uid ??
+                  '',
+              primaryColor: kPrimaryColor,
             ),
           ),
         ],
       ),
     );
-  }
-
-  List<DailyActivityData> _generateDailyActivity() {
-    return [
-      DailyActivityData(day: '月', count: 0),
-      DailyActivityData(day: '火', count: 0),
-      DailyActivityData(day: '水', count: 0),
-      DailyActivityData(day: '木', count: 0),
-      DailyActivityData(day: '金', count: 0),
-      DailyActivityData(day: '土', count: 0),
-      DailyActivityData(day: '日', count: 0),
-    ];
-  }
-
-  List<AccuracyTrendData> _generateAccuracyTrend() {
-    return [
-      AccuracyTrendData(week: 'W1', accuracy: 0.0),
-      AccuracyTrendData(week: 'W2', accuracy: 0.0),
-      AccuracyTrendData(week: 'W3', accuracy: 0.0),
-      AccuracyTrendData(week: 'W4', accuracy: 0.0),
-    ];
   }
 
   void _showUsageGuide(BuildContext context) {
