@@ -5,7 +5,7 @@ part 'analytics_model.freezed.dart';
 part 'analytics_model.g.dart';
 
 @freezed
-class DailyStats with _$DailyStats {
+abstract class DailyStats with _$DailyStats {
   const factory DailyStats({
     required String date, // YYYY-MM-DD
     required int questsCompleted,
@@ -21,7 +21,7 @@ class DailyStats with _$DailyStats {
 }
 
 @freezed
-class WeeklyStats with _$WeeklyStats {
+abstract class WeeklyStats with _$WeeklyStats {
   const factory WeeklyStats({
     required String weekStart, // YYYY-MM-DD (月曜日)
     required int totalStudyMinutes,
@@ -35,7 +35,7 @@ class WeeklyStats with _$WeeklyStats {
 }
 
 @freezed
-class MonthlyStats with _$MonthlyStats {
+abstract class MonthlyStats with _$MonthlyStats {
   const factory MonthlyStats({
     required String month, // YYYY-MM
     required int totalQuestsCompleted,
@@ -53,7 +53,7 @@ class MonthlyStats with _$MonthlyStats {
 }
 
 @freezed
-class ProgressAnalytics with _$ProgressAnalytics {
+abstract class ProgressAnalytics with _$ProgressAnalytics {
   const factory ProgressAnalytics({
     required String userId,
     required List<DailyStats> dailyHistory,
@@ -70,7 +70,7 @@ class ProgressAnalytics with _$ProgressAnalytics {
 }
 
 @freezed
-class CategoryMastery with _$CategoryMastery {
+abstract class CategoryMastery with _$CategoryMastery {
   const factory CategoryMastery({
     required String categoryId,
     required String categoryName,
@@ -86,7 +86,7 @@ class CategoryMastery with _$CategoryMastery {
 }
 
 @freezed
-class LearningPaceData with _$LearningPaceData {
+abstract class LearningPaceData with _$LearningPaceData {
   const factory LearningPaceData({
     required String userId,
     required int recommendedQuestsPerDay,
