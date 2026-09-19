@@ -4,7 +4,6 @@ part 'friend_model.freezed.dart';
 
 part 'friend_model.g.dart';
 
-@JsonSerializable()
 @freezed
 class Friend with _$Friend {
   const factory Friend({
@@ -21,7 +20,6 @@ class Friend with _$Friend {
   factory Friend.fromJson(Map<String, dynamic> json) => _$FriendFromJson(json);
 }
 
-@JsonSerializable()
 @freezed
 class FriendRequest with _$FriendRequest {
   const factory FriendRequest({
@@ -38,7 +36,6 @@ class FriendRequest with _$FriendRequest {
       _$FriendRequestFromJson(json);
 }
 
-@JsonSerializable()
 @freezed
 class FriendComparison with _$FriendComparison {
   const factory FriendComparison({

@@ -436,6 +436,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> with TickerProv
           ),
           const SizedBox(height: 80),
         ],
+          ),
           // Tab 2: 学習分析
           SingleChildScrollView(
             padding: const EdgeInsets.all(16),
