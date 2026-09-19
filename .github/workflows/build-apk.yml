@@ -57,6 +57,7 @@ jobs:
           rm -f pubspec.lock
           rm -rf .dart_tool/
           flutter pub get
+        shell: bash
 
       - name: Generate code (build_runner)
         run: flutter pub run build_runner build --delete-conflicting-outputs
@@ -79,14 +80,14 @@ jobs:
           "ANDROID_KEYSTORE_BASE64=$($secrets.ANDROID_KEYSTORE_BASE64)" >> $env:GITHUB_ENV
           "KEYSTORE_PASSWORD=$($secrets.ANDROID_KEYSTORE_PASSWORD)" >> $env:GITHUB_ENV
           "KEY_PASSWORD=$($secrets.ANDROID_KEY_PASSWORD)" >> $env:GITHUB_ENV
-        shell: powershell
+        shell: pwsh
 
       - name: Create keystore directory
         run: |
           if (!(Test-Path "android\keystore")) {
             New-Item -ItemType Directory -Path "android\keystore" -Force
           }
-        shell: powershell
+        shell: pwsh
 
       - name: Decode and write keystore
         run: |
@@ -97,14 +98,14 @@ jobs:
           } else {
             Write-Host "⚠️ ANDROID_KEYSTORE_BASE64 not set - debug build only"
           }
-        shell: powershell
+        shell: pwsh
 
       - name: "Map K: drive (Japanese path workaround)"
         run: |
           $projectPath = "${{ github.workspace }}"
           subst K: $projectPath
           Write-Host "✓ K: drive mapped to $projectPath"
-        shell: powershell
+        shell: pwsh
 
       - name: Build APK (Release)
         if: |
@@ -119,7 +120,7 @@ jobs:
             --dart-define=ADMOB_BANNER_ID=$env:ADMOB_BANNER_ID `
             --dart-define=ADMOB_INTERSTITIAL_ID=$env:ADMOB_INTERSTITIAL_ID
           Write-Host "✓ Release APK build completed"
-        shell: powershell
+        shell: pwsh
 
       - name: Build APK (Debug)
         if: github.event_name == 'workflow_dispatch' && inputs.build_type == 'debug'
@@ -127,7 +128,7 @@ jobs:
           cd K:/
           flutter build apk --debug
           Write-Host "✓ Debug APK build completed"
-        shell: powershell
+        shell: pwsh
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
@@ -148,11 +149,11 @@ jobs:
           } else {
             Write-Host "⚠️ APK not found"
           }
-        shell: powershell
+        shell: pwsh
 
       - name: "Unmount K: drive"
         if: always()
         run: |
           subst K: /d
           Write-Host "✓ K: drive unmounted"
-        shell: powershell
+        shell: pwsh
