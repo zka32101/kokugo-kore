@@ -70,6 +70,7 @@ flutter:
     - assets/character_levels/
     - assets/characters_lvmax/
     - assets/logos/
+    - assets/branding/
     - assets/images/
     - assets/backgrounds/
 
