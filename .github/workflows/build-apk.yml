@@ -90,10 +90,14 @@ jobs:
         shell: pwsh
 
       - name: Decode and write keystore
+        env:
+          # Secret Manager に無い場合はリポジトリの Secrets を使う
+          ANDROID_KEYSTORE_BASE64: ${{ env.ANDROID_KEYSTORE_BASE64 != '' && env.ANDROID_KEYSTORE_BASE64 || secrets.ANDROID_KEYSTORE_BASE64 }}
         run: |
           if ("$env:ANDROID_KEYSTORE_BASE64" -ne "") {
             $bytes = [Convert]::FromBase64String($env:ANDROID_KEYSTORE_BASE64)
             [System.IO.File]::WriteAllBytes("android\keystore\release_new.jks", $bytes)
+            "ANDROID_KEYSTORE_BASE64_DECODED=1" >> $env:GITHUB_ENV
             Write-Host "✓ Keystore decoded"
           } else {
             Write-Host "⚠️ ANDROID_KEYSTORE_BASE64 not set - debug build only"
@@ -126,6 +130,8 @@ jobs:
           (github.event_name == 'push')
         env:
           JAVA_HOME: ${{ env.JAVA_HOME }}
+          KEYSTORE_PASSWORD: ${{ env.KEYSTORE_PASSWORD != '' && env.KEYSTORE_PASSWORD || secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ env.KEY_PASSWORD != '' && env.KEY_PASSWORD || secrets.KEY_PASSWORD }}
         run: |
           cd K:/
           flutter build apk --release --no-pub `
