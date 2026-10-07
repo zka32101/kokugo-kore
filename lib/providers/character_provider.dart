@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'package:flutter/foundation.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,11 +18,6 @@ class CharacterNotifier extends BaseCharacterNotifier {
   @override
   String get storageKey => 'kokugo_character_profiles'; // Phase 4.1: 統一フォーマット
 }
-
-/// 統一キャラクタープロバイダー（Phase 4.1）
-final characterProvider = NotifierProvider<CharacterNotifier, CharacterProfileMap>(
-  CharacterNotifier.new,
-);
 
 /// クイズ画面に表示する「注目キャラクター」（=最後にレベルアップしたキャラ）
 final featuredCharacterProvider =

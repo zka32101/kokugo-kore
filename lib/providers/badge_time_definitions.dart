@@ -1,4 +1,4 @@
-import 'package:shared_core/models/badge_model.dart';
+﻿import 'package:shared_core/models/badge_model.dart';
 import '../models/badge_progress_model.dart';
 
 import '../models/badge_reward_model.dart';
@@ -42,7 +42,7 @@ final timeBadgeDefinitions = <String, BadgeDefinitionWithTime>{
     id: 'consistent_learner',
     title: '継続は力なり',
     emoji: '📚',
-    rarity: BadgeRarity.epic,
+    rarity: BadgeRarity.legendary,
     reward: const BadgeReward(coinAmount: 150),
     description: '同じ時間帯で5回学習',
     hoursRange: null, // 時間帯不問
@@ -60,7 +60,7 @@ final timeBadgeDefinitions = <String, BadgeDefinitionWithTime>{
     id: 'daily_grind',
     title: 'デイリーグラインド',
     emoji: '💪',
-    rarity: BadgeRarity.epic,
+    rarity: BadgeRarity.legendary,
     reward: const BadgeReward(coinAmount: 120),
     description: '毎日3問以上解く（7日連続）',
     hoursRange: null, // 日付チェック

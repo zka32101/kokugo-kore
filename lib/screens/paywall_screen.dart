@@ -1,8 +1,9 @@
-// Paywall / Subscription Screen
+﻿// Paywall / Subscription Screen
 // Phase 4.2: RevenueCat subscription UI
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 
 import '../providers/subscription_provider.dart';
 import '../utils/constants.dart';
@@ -20,7 +21,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   @override
   Widget build(BuildContext context) {
     final subscriptionState = ref.watch(subscriptionProvider);
-    final detailsState = ref.watch(subscriptionDetailsProvider);
+    final offerings = subscriptionState.availableOfferings;
 
     return Scaffold(
       appBar: AppBar(
@@ -105,46 +106,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           // Pricing Section
           Padding(
             padding: const EdgeInsets.all(20),
-            child: detailsState.when(
-              data: (details) => Column(
-                children: [
-                  Text(
-                    '価格',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey.shade300),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      children: [
-                        Text(
-                          details.localizedPrice,
-                          style: Theme.of(context)
-                              .textTheme
-                              .displaySmall
-                              ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          '月額（7日間無料トライアル付き）',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              loading: () => const CircularProgressIndicator(),
-              error: (err, _) => Text('価格情報を取得できません: $err'),
-            ),
+            child: _buildPrice(subscriptionState, offerings, context),
           ),
 
           const SizedBox(height: 20),
@@ -270,13 +232,64 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     );
   }
 
+
+  Widget _buildPrice(SubscriptionState state, List<Package>? offerings, BuildContext context) {
+    if (state.isLoading && offerings == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (offerings == null || offerings.isEmpty) {
+      return Text(state.errorMessage ?? '価格情報を取得できません');
+    }
+    final price = offerings.first.storeProduct.priceString;
+    return Column(
+      children: [
+                  Text(
+                    '価格',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          price,
+                          style: Theme.of(context)
+                              .textTheme
+                              .displaySmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '月額（7日間無料トライアル付き）',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                  ),
+      ],
+    );
+  }
+
   Future<void> _handlePurchase() async {
     setState(() => _isLoading = true);
 
     try {
+      final offerings = ref.read(subscriptionProvider).availableOfferings;
+      if (offerings == null || offerings.isEmpty) {
+        throw Exception('購入可能なプランが見つかりません');
+      }
       await ref
           .read(subscriptionProvider.notifier)
-          .purchaseSubscription();
+          .purchaseSubscription(offerings.first);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

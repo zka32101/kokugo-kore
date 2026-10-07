@@ -1,4 +1,4 @@
-import 'package:shared_core/models/badge_model.dart' show BadgeRarity;
+﻿import 'package:shared_core/models/badge_model.dart' show BadgeRarity;
 import '../models/badge_progress_model.dart';
 
 import '../models/badge_reward_model.dart';
@@ -23,7 +23,7 @@ final challengeBadgeDefinitions = <String, BadgeDefinition>{
     id: 'challenge_all_stages',
     title: '全ステージ制覇',
     emoji: '🏆',
-    rarity: BadgeRarity.epic,
+    rarity: BadgeRarity.legendary,
     reward: const BadgeReward(coinAmount: 100),
   ),
   'challenge_speedrun': BadgeDefinition(
@@ -37,7 +37,7 @@ final challengeBadgeDefinitions = <String, BadgeDefinition>{
     id: 'challenge_nonstop',
     title: 'ノンストップ',
     emoji: '💯',
-    rarity: BadgeRarity.epic,
+    rarity: BadgeRarity.legendary,
     reward: const BadgeReward(coinAmount: 80),
   ),
 };
@@ -100,7 +100,7 @@ final milestoneBadgeDefinitions = <String, BadgeDefinition>{
     id: 'coins_1000',
     title: 'コイン富豪',
     emoji: '💰',
-    rarity: BadgeRarity.epic,
+    rarity: BadgeRarity.legendary,
     reward: const BadgeReward(coinAmount: 100),
   ),
 };

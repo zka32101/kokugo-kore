@@ -1,4 +1,4 @@
-import 'package:collection/collection.dart';
+﻿import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_core/models/badge_model.dart' hide allBadges;
@@ -389,10 +389,10 @@ class _BadgeScreenState extends ConsumerState<BadgeScreen> {
   Color _getRarityColor(BadgeRarity rarity) {
     return switch (rarity) {
       BadgeRarity.common => Colors.grey,
+      BadgeRarity.uncommon => Colors.green,
       BadgeRarity.rare => Colors.purple,
-      BadgeRarity.epic => Colors.orange,
-      BadgeRarity.legendary => Colors.amber,
-      BadgeRarity.secret => Colors.black54,
+      BadgeRarity.legendary => Colors.orange,
+      BadgeRarity.mythic => Colors.amber,
     };
   }
 }
