@@ -106,7 +106,7 @@ jobs:
         run: |
           if ("$env:GOOGLE_SERVICES_JSON_BASE64" -ne "") {
             $bytes = [Convert]::FromBase64String($env:GOOGLE_SERVICES_JSON_BASE64)
-            [System.IO.File]::WriteAllBytes("androidpp\google-services.json", $bytes)
+            [System.IO.File]::WriteAllBytes("android/app/google-services.json", $bytes)
             Write-Host "✓ google-services.json written"
           } else {
             Write-Host "⚠️ GOOGLE_SERVICES_JSON_BASE64 not set"
