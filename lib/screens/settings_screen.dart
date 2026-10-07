@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_core/shared_core.dart'
     show
@@ -292,7 +292,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> with TickerProv
               if (userId.isNotEmpty) {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => NotificationSettingsPage(userId: userId),
+                    builder: (_) => const NotificationSettingsPage(),
                   ),
                 );
               }
@@ -308,7 +308,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> with TickerProv
             trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: kTextMuted),
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (_) => const RetentionDashboard(),
+                builder: (_) => RetentionDashboard(userId: FirebaseAuth.instance.currentUser?.uid ?? ''),
               ),
             ),
           ),
