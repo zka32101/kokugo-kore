@@ -69,7 +69,7 @@ jobs:
           "KEYSTORE_PASSWORD=$($secrets.ANDROID_KEYSTORE_PASSWORD)" >> $env:GITHUB_ENV
           "KEY_PASSWORD=$($secrets.ANDROID_KEY_PASSWORD)" >> $env:GITHUB_ENV
           Set-Content -Path "$env:RUNNER_TEMP\play-console-sa-key.json" -Value $secrets.PLAY_CONSOLE_SA_KEY
-        shell: powershell
+        shell: pwsh
 
       - name: Write google-services.json
         env:
@@ -82,7 +82,7 @@ jobs:
           } else {
             Write-Host "⚠️ GOOGLE_SERVICES_JSON_BASE64 not set"
           }
-        shell: powershell
+        shell: pwsh
 
       - name: Use repository Play service account when Secret Manager has none
         env:
@@ -97,14 +97,14 @@ jobs:
               Write-Host "⚠️ No Play service account available"
             }
           }
-        shell: powershell
+        shell: pwsh
 
       - name: Create keystore directory
         run: |
           if (!(Test-Path "android\keystore")) {
             New-Item -ItemType Directory -Path "android\keystore" -Force
           }
-        shell: powershell
+        shell: pwsh
 
       - name: Decode and write keystore
         env:
@@ -119,14 +119,14 @@ jobs:
             Write-Host "⚠️ ANDROID_KEYSTORE_BASE64 not set - skipping release build"
             exit 1
           }
-        shell: powershell
+        shell: pwsh
 
       - name: "Map K: drive (Japanese path workaround)"
         run: |
           $projectPath = "${{ github.workspace }}"
           subst K: $projectPath
           Write-Host "✓ K: drive mapped to $projectPath"
-        shell: powershell
+        shell: pwsh
 
       - name: Build AAB (Release)
         env:
@@ -140,7 +140,7 @@ jobs:
             --dart-define=ADMOB_BANNER_ID=$env:ADMOB_BANNER_ID `
             --dart-define=ADMOB_INTERSTITIAL_ID=$env:ADMOB_INTERSTITIAL_ID
           Write-Host "✓ Release AAB build completed"
-        shell: powershell
+        shell: pwsh
 
       - name: Verify AAB output
         run: |
@@ -154,7 +154,7 @@ jobs:
             Write-Host "❌ AAB not found"
             exit 1
           }
-        shell: powershell
+        shell: pwsh
 
       - name: Upload to Google Play Internal Track
         uses: r0adkll/upload-google-play@eb49699984a39f23558439581660aa6f088acfd6 # v1
@@ -167,14 +167,14 @@ jobs:
       - name: Clean up Play Console key file
         if: always()
         run: Remove-Item -Path "$env:RUNNER_TEMP\play-console-sa-key.json" -ErrorAction SilentlyContinue
-        shell: powershell
+        shell: pwsh
 
       - name: "Unmount K: drive"
         if: always()
         run: |
           subst K: /d
           Write-Host "✓ K: drive unmounted"
-        shell: powershell
+        shell: pwsh
 
       - name: Upload AAB artifact
         if: always()
