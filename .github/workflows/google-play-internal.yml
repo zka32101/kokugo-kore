@@ -68,6 +68,34 @@ jobs:
           Set-Content -Path "$env:RUNNER_TEMP\play-console-sa-key.json" -Value $secrets.PLAY_CONSOLE_SA_KEY
         shell: powershell
 
+      - name: Write google-services.json
+        env:
+          GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}
+        run: |
+          if ("$env:GOOGLE_SERVICES_JSON_BASE64" -ne "") {
+            $bytes = [Convert]::FromBase64String($env:GOOGLE_SERVICES_JSON_BASE64)
+            [System.IO.File]::WriteAllBytes("android/app/google-services.json", $bytes)
+            Write-Host "✓ google-services.json written"
+          } else {
+            Write-Host "⚠️ GOOGLE_SERVICES_JSON_BASE64 not set"
+          }
+        shell: powershell
+
+      - name: Use repository Play service account when Secret Manager has none
+        env:
+          REPO_PLAY_SA: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          $f = "$env:RUNNER_TEMP\play-console-sa-key.json"
+          if (-not (Test-Path $f) -or ((Get-Item $f).Length -lt 10)) {
+            if ("$env:REPO_PLAY_SA" -ne "") {
+              Set-Content -Path $f -Value $env:REPO_PLAY_SA
+              Write-Host "✓ Play service account taken from repository secret"
+            } else {
+              Write-Host "⚠️ No Play service account available"
+            }
+          }
+        shell: powershell
+
       - name: Create keystore directory
         run: |
           if (!(Test-Path "android\keystore")) {
@@ -76,6 +104,9 @@ jobs:
         shell: powershell
 
       - name: Decode and write keystore
+        env:
+          # Secret Manager に無い場合はリポジトリの Secrets を使う
+          ANDROID_KEYSTORE_BASE64: ${{ env.ANDROID_KEYSTORE_BASE64 != '' && env.ANDROID_KEYSTORE_BASE64 || secrets.ANDROID_KEYSTORE_BASE64 }}
         run: |
           if ("$env:ANDROID_KEYSTORE_BASE64" -ne "") {
             $bytes = [Convert]::FromBase64String($env:ANDROID_KEYSTORE_BASE64)
@@ -97,6 +128,8 @@ jobs:
       - name: Build AAB (Release)
         env:
           JAVA_HOME: ${{ env.JAVA_HOME }}
+          KEYSTORE_PASSWORD: ${{ env.KEYSTORE_PASSWORD != '' && env.KEYSTORE_PASSWORD || secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ env.KEY_PASSWORD != '' && env.KEY_PASSWORD || secrets.KEY_PASSWORD }}
         run: |
           cd K:/
           flutter build appbundle --release --no-pub `
