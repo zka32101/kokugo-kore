@@ -81,3 +81,9 @@ flutter:
 # androidx.browser 1.5.0 のみを要求する古い url_launcher_android に固定して整合性を保つ。
 dependency_overrides:
   url_launcher_android: 6.3.6
+  # shared_core が cross_promo_kit を v0.2.0 で固定しているため、v0.3.0 に上書きする。
+  # shared_core 側が v0.3.0 以降を参照するようになったら削除してよい。
+  cross_promo_kit:
+    git:
+      url: https://github.com/zka32101/cross_promo_kit.git
+      ref: v0.3.0
