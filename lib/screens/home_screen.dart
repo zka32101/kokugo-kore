@@ -580,6 +580,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: CrossPromoSection(
               currentAppId: 'com.yourwish.shougakukore.kokugo',
               currentCategory: '小学コレ',
+              isChildDirected: true,
               beforeOpenStore: (context) => requireParentalGate(context),
             ),
           ),
