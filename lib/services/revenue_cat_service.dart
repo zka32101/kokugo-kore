@@ -8,7 +8,7 @@ import 'package:flutter/services.dart' show PlatformException;
 import 'package:purchases_flutter/purchases_flutter.dart';
 
 /// RevenueCat 設定値。CI/CD からは --dart-define で注入する
-/// （ADMOB の AdIds と同じパターン。値は GitHub Secrets `REVENUE_CAT_API_KEY` 経由）。
+/// （値は GitHub Secrets `REVENUE_CAT_API_KEY` 経由）。
 class RevenueCatConfig {
   static const String apiKey = String.fromEnvironment(
     'REVENUE_CAT_API_KEY',

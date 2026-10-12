@@ -1,4 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- ネットワーク権限（Firebase・課金） -->
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -6,6 +7,9 @@
     <!-- Google Play Billing（in_app_purchase_android は自身のマニフェストで
          この権限を宣言しないため、アプリ側での宣言が必須） -->
     <uses-permission android:name="com.android.vending.BILLING"/>
+
+    <!-- 子ども向けアプリのため広告IDは使用しない。依存SDKが自動追加する権限も除去する -->
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" tools:node="remove"/>
 
     <application
         android:label="小学コレ！国語"
@@ -37,11 +41,6 @@
             android:name="flutterEmbedding"
             android:value="2" />
 
-        <!-- AdMob App ID。デフォルトはテスト用ID。本番IDは build.gradle.kts の
-             manifestPlaceholders["admobAppId"]（環境変数 ADMOB_APP_ID_ANDROID）で上書きする -->
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="${admobAppId}"/>
     </application>
 
     <queries>

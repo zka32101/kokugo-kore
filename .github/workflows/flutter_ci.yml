@@ -59,6 +59,10 @@ jobs:
           flutter clean
           flutter pub get
 
+      # *.g.dart / *.freezed.dart はコミットしていないため、ビルド前に生成する
+      - name: Generate code (build_runner)
+        run: dart run build_runner build --delete-conflicting-outputs
+
       # コード署名なしのビルド（コンパイルが通るかの確認）のみを行う軽量ジョブ。
       # 署名付きビルド・TestFlightアップロードは build-ios-signed ジョブ（手動実行）を使う。
       - name: Build iOS (no codesign)
@@ -95,6 +99,10 @@ jobs:
           rm -rf .dart_tool pubspec.lock
           flutter clean
           flutter pub get
+
+      # *.g.dart / *.freezed.dart はコミットしていないため、ビルド前に生成する
+      - name: Generate code (build_runner)
+        run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Import signing certificate
         env:

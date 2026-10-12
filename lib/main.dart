@@ -4,7 +4,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'screens/splash_screen.dart';
 import 'widgets/startup_splash.dart';
-import 'services/ad_service.dart';
 import 'services/revenue_cat_service.dart';
 
 void main() async {
@@ -20,12 +19,6 @@ void main() async {
     );
   } catch (e) {
     debugPrint('Firebase init failed: $e');
-  }
-
-  try {
-    await AdService.initialize();
-  } catch (e) {
-    debugPrint('AdMob init failed: $e');
   }
 
   try {

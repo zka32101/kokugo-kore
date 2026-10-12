@@ -29,7 +29,7 @@ jobs:
       gcp_project_id: shougakukore
       gcp_service_account: kokugo-kore-ci-bot@shougakukore.iam.gserviceaccount.com
       gcp_wif_provider: projects/533411745674/locations/global/workloadIdentityPools/kokugo-kore-github-pool/providers/kokugo-kore-github-provider
-      secret_keys: "revenuecat-api-key,admob-app-id,admob-banner-ad-unit-id,admob-interstitial-ad-unit-id,android-keystore-base64,android-keystore-password,android-key-password"
+      secret_keys: "revenuecat-api-key,android-keystore-base64,android-keystore-password,android-key-password"
 
   build-apk:
     name: Build APK (${{ inputs.build_type }})
@@ -74,9 +74,6 @@ jobs:
             Write-Host "::add-mask::$($prop.Value)"
           }
           "REVENUECAT_API_KEY=$($secrets.REVENUECAT_API_KEY)" >> $env:GITHUB_ENV
-          "ADMOB_APP_ID_ANDROID=$($secrets.ADMOB_APP_ID)" >> $env:GITHUB_ENV
-          "ADMOB_BANNER_ID=$($secrets.ADMOB_BANNER_AD_UNIT_ID)" >> $env:GITHUB_ENV
-          "ADMOB_INTERSTITIAL_ID=$($secrets.ADMOB_INTERSTITIAL_AD_UNIT_ID)" >> $env:GITHUB_ENV
           "ANDROID_KEYSTORE_BASE64=$($secrets.ANDROID_KEYSTORE_BASE64)" >> $env:GITHUB_ENV
           "KEYSTORE_PASSWORD=$($secrets.ANDROID_KEYSTORE_PASSWORD)" >> $env:GITHUB_ENV
           "KEY_PASSWORD=$($secrets.ANDROID_KEY_PASSWORD)" >> $env:GITHUB_ENV
@@ -135,9 +132,7 @@ jobs:
         run: |
           cd K:/
           flutter build apk --release --no-pub `
-            --dart-define=REVENUE_CAT_API_KEY=$env:REVENUECAT_API_KEY `
-            --dart-define=ADMOB_BANNER_ID=$env:ADMOB_BANNER_ID `
-            --dart-define=ADMOB_INTERSTITIAL_ID=$env:ADMOB_INTERSTITIAL_ID
+            --dart-define=REVENUE_CAT_API_KEY=$env:REVENUECAT_API_KEY
           Write-Host "✓ Release APK build completed"
         shell: pwsh
 

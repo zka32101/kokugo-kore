@@ -2,9 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/premium_provider.dart';
 
-import '../services/ad_service.dart';
 import '../theme/app_theme.dart';
 import 'proverb_quiz_screen.dart' show QuizChoiceButton;
 
@@ -528,8 +526,6 @@ class _IdiomQuizScreenState extends ConsumerState<IdiomQuizScreen>
       _feedbackCtrl.reset();
     } else {
       setState(() => _finished = true);
-      final premium = ref.read(premiumProvider);
-      if (!premium.isPremium && !premium.isTrialActive) AdService.showInterstitial();
     }
   }
 
