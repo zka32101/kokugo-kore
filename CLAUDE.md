@@ -33,7 +33,7 @@
 | 機能 | 状態 | 詳細 |
 |---|---|---|
 | テーマ（ライト/ダーク） | ✅ | ThemeProvider 統合 |
-| Google Mobile Ads | ✅ | バナー・インタースティシャル広告 |
+| 広告 | ❌ なし | 小学コレシリーズは学習の邪魔になるため広告を入れない方針（AdMob 削除済み、AD_ID 権限も除去） |
 | RevenueCat 統合 | ✅ | 月額¥120 サブスク対応 |
 | 領収書検証 | ✅ | Google Play/App Store API |
 
@@ -76,7 +76,6 @@ lib/
 │   ├── profile_provider.dart   # ユーザープロフィール
 │   ├── coin_provider.dart      # ポイント管理
 │   ├── character_provider.dart # キャラクター育成
-│   └── ads_provider.dart       # 広告管理
 ├── screens/                    # UI 画面
 │   ├── home_screen.dart
 │   ├── quiz_screen.dart
@@ -103,7 +102,6 @@ lib/
 - **State Management**: Riverpod 2.6.x StateNotifier
 - **Backend**: Firebase Firestore, Authentication
 - **In-app Purchase**: RevenueCat SDK
-- **Ad Network**: Google Mobile Ads (AdMob)
 - **Persistence**: SharedPreferences + Hive
 - **UI**: Material Design 3
 - **Package**: shared_core（git dependency）
@@ -164,10 +162,9 @@ final isValid = await revenueCatService.isSubscribed();
 # .env ファイル（ローカルのみ、コミット禁止）
 FIREBASE_PROJECT_ID=kokugo-xxx
 REVENUE_CAT_API_KEY=appl_xxxx
-ADMOB_ANDROID_ID=ca-app-pub-xxxx
 
 # CI/CD 環境（GitHub Secrets）
-# → REVENUE_CAT_API_KEY, ADMOB_IDS など管理
+# → REVENUE_CAT_API_KEY など管理
 ```
 
 ### セキュリティベストプラクティス
@@ -253,7 +250,6 @@ flutter build web
 | `firebase_core not initialized` | Firebase 初期化失敗 | `main.dart` で `Firebase.initializeApp()` を待つ |
 | `Riverpod state not watched` | Provider 参照ミス | `ref.watch()` 使用（`ref.read()` でなく） |
 | `RevenueCat not connected` | SDK 初期化失敗 | ネットワーク接続・API キー確認 |
-| `Ad Unit ID invalid` | テスト用 ID のまま | 本番 ID に変更 |
 | `日本語パス問題` | Kotlin コンパイラエラー | K: ドライブ割り当て実行 |
 
 ## 🌳 Git ブランチ構成
@@ -310,7 +306,7 @@ develop
 - **統一案**: 全アプリ RevenueCat 統合
 - **実装内容**:
   - 月額プラン: ¥120（全アプリ共通）
-  - プレミアム機能: 無制限クイズ・AI相談・広告削除
+  - プレミアム機能: 無制限クイズ・AI相談
   - 領収書検証: Google Play/App Store API
 
 #### 5. 学習レポート&保護者ゲート 📊
@@ -386,7 +382,7 @@ flutter run -v
 ### v1.0（リリース中）
 - ✅ 基本クイズ・進捗管理
 - ✅ ゲーミフィケーション（ポイント・バッジ・キャラ）
-- ✅ 広告システム統合
+- ✅ 広告なし方針（広告 SDK は入れない）
 
 ### v1.1（開発中）
 - ✅ RevenueCat SDK 接続
