@@ -13,16 +13,18 @@ void main() async {
   // 初期化後の本物の runApp で置き換わる。
   runApp(const MaterialApp(debugShowCheckedModeBanner: false, home: StartupSplash()));
 
+  // 起動をネットワーク待ちで止めない: 各初期化にタイムアウトを付ける
+  // （審査端末の低速/オフライン対策。タイムアウトしてもアプリは起動する）
   try {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
-    );
+    ).timeout(const Duration(seconds: 5));
   } catch (e) {
     debugPrint('Firebase init failed: $e');
   }
 
   try {
-    await RevenueCatService().initialize();
+    await RevenueCatService().initialize().timeout(const Duration(seconds: 5));
   } catch (e) {
     debugPrint('RevenueCat init failed: $e');
   }
