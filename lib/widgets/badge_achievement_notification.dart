@@ -6,6 +6,9 @@ import 'package:shared_core/models/badge_model.dart';
 
 import '../theme/app_theme.dart';
 import '../models/badge_set_bonus_model.dart';
+import 'package:kokugo_kore/widgets/ukalab_emoji.dart';
+import 'package:kokugo_kore/widgets/badge_emblem.dart';
+import 'package:kokugo_kore/widgets/celebrate_art.dart';
 
 class BadgeAchievementNotification extends StatefulWidget {
   final List<BadgeModel>? badges;
@@ -200,64 +203,36 @@ class _BadgeAchievementNotificationState
 
   Widget _buildSingleBadgeCard(BadgeModel badge) {
     return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            kPrimaryColor.withAlpha(240),
-            kPrimaryColor.withAlpha(200),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: kPrimaryColor.withAlpha(100),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
-          ),
-        ],
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.8,
       ),
-      child: Padding(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // タイトル
-            const Text(
-              '🎉 バッジを獲得しました！',
-              style: TextStyle(
-                fontSize: 18,
+            const CelebrateArt(ribbonText: 'おめでとう！'),
+            const SizedBox(height: 8),
+            BadgeEmblem(badgeId: badge.id, fallbackEmoji: badge.emoji, size: 48),
+            const SizedBox(height: 8),
+            Text(
+              badge.title,
+              style: const TextStyle(
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: Colors.black87,
               ),
+              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 16),
-
-            // バッジアイコンと名前
-            Column(
-              children: [
-                _buildBadgeIcon(badge.emoji),
-                const SizedBox(height: 12),
-                Text(
-                  badge.title,
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  badge.description,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Colors.white70,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
+            const SizedBox(height: 8),
+            Text(
+              badge.description,
+              style: const TextStyle(fontSize: 13, color: Colors.black54),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
 
@@ -277,7 +252,7 @@ class _BadgeAchievementNotificationState
                 child: const Text(
                   'すごい！',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: kPrimaryColor,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -291,39 +266,20 @@ class _BadgeAchievementNotificationState
 
   Widget _buildMultipleBadgesCard() {
     return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.amber.shade600.withAlpha(240),
-            Colors.orange.shade600.withAlpha(200),
-          ],
-        ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.amber.withAlpha(100),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
-          ),
-        ],
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.8,
       ),
-      child: Padding(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // タイトル
-            const Text(
-              '🎉🎉 複数のバッジを獲得！',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
-            const SizedBox(height: 16),
+            const CelebrateArt(ribbonText: 'おめでとう！'),
+            const SizedBox(height: 8),
 
             // バッジリスト
             Wrap(
@@ -352,7 +308,7 @@ class _BadgeAchievementNotificationState
                 child: const Text(
                   '完璧です！',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: kPrimaryColor,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -368,13 +324,13 @@ class _BadgeAchievementNotificationState
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withAlpha(200),
+        color: Colors.grey.shade100,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(badge.emoji, style: const TextStyle(fontSize: 20)),
+          BadgeEmblem(badgeId: badge.id, fallbackEmoji: badge.emoji, size: 26),
           const SizedBox(width: 8),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -401,7 +357,7 @@ class _BadgeAchievementNotificationState
     );
   }
 
-  Widget _buildBadgeIcon(String emoji) {
+  Widget _buildBadgeIcon(String badgeId, String emoji) {
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -446,10 +402,7 @@ class _BadgeAchievementNotificationState
               ],
             ),
             child: Center(
-              child: Text(
-                emoji,
-                style: const TextStyle(fontSize: 48),
-              ),
+              child: BadgeEmblem(badgeId: badgeId, fallbackEmoji: emoji, size: 56),
             ),
           ),
         ),
@@ -496,10 +449,7 @@ class _BadgeAchievementNotificationState
             // セットアイコンと名前
             Column(
               children: [
-                Text(
-                  setBonus.emoji,
-                  style: const TextStyle(fontSize: 56),
-                ),
+                UkalabEmoji(setBonus.emoji, size: 56),
                 const SizedBox(height: 16),
                 Text(
                   setBonus.title,

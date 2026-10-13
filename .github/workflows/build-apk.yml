@@ -3,7 +3,7 @@ name: Build Android APK
 on:
   push:
     branches:
-      - 'claude/**'
+      - 'claude/continuation-session-*'
       - 'main'
     tags:
       - 'v*'
@@ -19,22 +19,11 @@ on:
           - debug
 
 jobs:
-  secrets:
-    uses: zka32101/shared_core/.github/workflows/secure-secrets-inject.yml@main
-    permissions:
-      id-token: write
-      contents: read
-    with:
-      app_name: kokugo-kore
-      gcp_project_id: shougakukore
-      gcp_service_account: kokugo-kore-ci-bot@shougakukore.iam.gserviceaccount.com
-      gcp_wif_provider: projects/533411745674/locations/global/workloadIdentityPools/kokugo-kore-github-pool/providers/kokugo-kore-github-provider
-      secret_keys: "revenuecat-api-key,android-keystore-base64,android-keystore-password,android-key-password"
-
   build-apk:
     name: Build APK (${{ inputs.build_type }})
-    needs: secrets
     runs-on: windows-latest
+    permissions:
+      id-token: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -51,75 +40,67 @@ jobs:
           flutter-version: '3.44.4'
           channel: 'stable'
 
+      - name: Authenticate to Google Cloud (WIF)
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: 'projects/1234567890/locations/global/workloadIdentityPools/github-actions/providers/github-provider'
+          service_account: 'kokugo-kore-ci-bot@shougakukore.iam.gserviceaccount.com'
+          token_format: 'access_token'
+          access_token_lifetime: '600s'
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Retrieve secrets from Secret Manager
+        run: |
+          # Retrieve ANDROID_KEYSTORE_BASE64
+          $keystoreBase64 = gcloud secrets versions access latest --secret="kokugo-kore-android-keystore-base64" --project="shougakukore"
+          "ANDROID_KEYSTORE_BASE64=$keystoreBase64" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+          # Retrieve ANDROID_KEYSTORE_PASSWORD
+          $keystorePassword = gcloud secrets versions access latest --secret="kokugo-kore-android-keystore-password" --project="shougakukore"
+          "KEYSTORE_PASSWORD=$keystorePassword" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+          # Retrieve ANDROID_KEY_PASSWORD
+          $keyPassword = gcloud secrets versions access latest --secret="kokugo-kore-android-key-password" --project="shougakukore"
+          "KEY_PASSWORD=$keyPassword" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
+          Write-Host "✓ Secrets retrieved from Secret Manager"
+        shell: powershell
+
       - name: Clean and get dependencies
         run: |
           flutter clean
-          rm -f pubspec.lock
-          rm -rf .dart_tool/
           flutter pub get
-        shell: bash
 
-      - name: Generate code (build_runner)
-        run: flutter pub run build_runner build --delete-conflicting-outputs
 
       - name: Analyze code
         run: flutter analyze --no-fatal-infos --no-fatal-warnings
-
-      - name: Parse secrets from Secret Manager
-        env:
-          SECRETS_JSON: ${{ needs.secrets.outputs.secrets_json }}
-        run: |
-          $secrets = $env:SECRETS_JSON | ConvertFrom-Json
-          foreach ($prop in $secrets.PSObject.Properties) {
-            Write-Host "::add-mask::$($prop.Value)"
-          }
-          "REVENUECAT_API_KEY=$($secrets.REVENUECAT_API_KEY)" >> $env:GITHUB_ENV
-          "ANDROID_KEYSTORE_BASE64=$($secrets.ANDROID_KEYSTORE_BASE64)" >> $env:GITHUB_ENV
-          "KEYSTORE_PASSWORD=$($secrets.ANDROID_KEYSTORE_PASSWORD)" >> $env:GITHUB_ENV
-          "KEY_PASSWORD=$($secrets.ANDROID_KEY_PASSWORD)" >> $env:GITHUB_ENV
-        shell: pwsh
 
       - name: Create keystore directory
         run: |
           if (!(Test-Path "android\keystore")) {
             New-Item -ItemType Directory -Path "android\keystore" -Force
           }
-        shell: pwsh
+        shell: powershell
 
       - name: Decode and write keystore
-        env:
-          # Secret Manager に無い場合はリポジトリの Secrets を使う
-          ANDROID_KEYSTORE_BASE64: ${{ env.ANDROID_KEYSTORE_BASE64 != '' && env.ANDROID_KEYSTORE_BASE64 || secrets.ANDROID_KEYSTORE_BASE64 }}
         run: |
-          if ("$env:ANDROID_KEYSTORE_BASE64" -ne "") {
-            $bytes = [Convert]::FromBase64String($env:ANDROID_KEYSTORE_BASE64)
+          if ("${{ env.ANDROID_KEYSTORE_BASE64 }}" -ne "") {
+            $bytes = [Convert]::FromBase64String("${{ env.ANDROID_KEYSTORE_BASE64 }}")
             [System.IO.File]::WriteAllBytes("android\keystore\release_new.jks", $bytes)
-            "ANDROID_KEYSTORE_BASE64_DECODED=1" >> $env:GITHUB_ENV
             Write-Host "✓ Keystore decoded"
           } else {
-            Write-Host "⚠️ ANDROID_KEYSTORE_BASE64 not set - debug build only"
+            Write-Host "⚠️ ANDROID_KEYSTORE_BASE64 not available - debug build only"
           }
-        shell: pwsh
+        shell: powershell
 
-      - name: Write google-services.json
-        env:
-          GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}
-        run: |
-          if ("$env:GOOGLE_SERVICES_JSON_BASE64" -ne "") {
-            $bytes = [Convert]::FromBase64String($env:GOOGLE_SERVICES_JSON_BASE64)
-            [System.IO.File]::WriteAllBytes("android/app/google-services.json", $bytes)
-            Write-Host "✓ google-services.json written"
-          } else {
-            Write-Host "⚠️ GOOGLE_SERVICES_JSON_BASE64 not set"
-          }
-        shell: pwsh
-
-      - name: "Map K: drive (Japanese path workaround)"
+      - name: Map K: drive (Japanese path workaround)
         run: |
           $projectPath = "${{ github.workspace }}"
           subst K: $projectPath
           Write-Host "✓ K: drive mapped to $projectPath"
-        shell: pwsh
+        shell: powershell
 
       - name: Build APK (Release)
         if: |
@@ -127,14 +108,11 @@ jobs:
           (github.event_name == 'push')
         env:
           JAVA_HOME: ${{ env.JAVA_HOME }}
-          KEYSTORE_PASSWORD: ${{ env.KEYSTORE_PASSWORD != '' && env.KEYSTORE_PASSWORD || secrets.KEYSTORE_PASSWORD }}
-          KEY_PASSWORD: ${{ env.KEY_PASSWORD != '' && env.KEY_PASSWORD || secrets.KEY_PASSWORD }}
         run: |
           cd K:/
-          flutter build apk --release --no-pub `
-            --dart-define=REVENUE_CAT_API_KEY=$env:REVENUECAT_API_KEY
+          flutter build apk --release --no-pub
           Write-Host "✓ Release APK build completed"
-        shell: pwsh
+        shell: powershell
 
       - name: Build APK (Debug)
         if: github.event_name == 'workflow_dispatch' && inputs.build_type == 'debug'
@@ -142,7 +120,7 @@ jobs:
           cd K:/
           flutter build apk --debug
           Write-Host "✓ Debug APK build completed"
-        shell: pwsh
+        shell: powershell
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
@@ -163,11 +141,11 @@ jobs:
           } else {
             Write-Host "⚠️ APK not found"
           }
-        shell: pwsh
+        shell: powershell
 
-      - name: "Unmount K: drive"
+      - name: Unmount K: drive
         if: always()
         run: |
           subst K: /d
           Write-Host "✓ K: drive unmounted"
-        shell: pwsh
+        shell: powershell

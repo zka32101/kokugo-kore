@@ -9,6 +9,7 @@ import '../providers/coin_provider.dart';
 
 import '../data/kokugo_characters.dart';
 import '../theme/app_theme.dart';
+import '../reward_assets.dart';
 import '../providers/badge_metrics_provider.dart';
 import '../providers/study_habit_provider.dart';
 import '../providers/badge_time_definitions.dart';
@@ -17,6 +18,7 @@ import '../providers/progress_provider.dart';
 import '../providers/badge_provider.dart';
 import '../widgets/character_unlock_dialog.dart';
 import '../widgets/badge_achievement_notification.dart';
+import 'package:kokugo_kore/widgets/ukalab_emoji.dart';
 
 class ResultScreen extends ConsumerStatefulWidget {
   final QuestResult result;
@@ -33,6 +35,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
   List<BadgeModel> _newBadges = [];
   bool _saving = true;
   bool _saveStarted = false;
+  List<String> _bonusAssets = const [];
 
   @override
   void initState() {
@@ -49,6 +52,15 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
     final r = widget.result;
     final s = widget.stage;
     final isKanji = s.quizType == QuizType.primary;
+    // おまけシール判定（記録前の進捗で「そのステージの初挑戦か」を見る）
+    final firstAttempt = !ref.read(progressProvider).clearedStageIds.contains('g${s.grade}_s${s.stageNumber}');
+    if (mounted) {
+      setState(() {
+        _bonusAssets = bonusStickerAssets(
+            firstAttempt: firstAttempt && r.isPassed,
+            firstPerfect: firstAttempt && r.isPerfect);
+      });
+    }
 
     try {
       await ref.read(progressProvider.notifier).recordResult(
@@ -260,7 +272,7 @@ class _ResultScreenState extends ConsumerState<ResultScreen> {
                 const SizedBox(height: 16),
                 _saving
                     ? const CircularProgressIndicator()
-                    : _ScoreDisplay(emoji: emoji, message: message, r: r, color: color),
+                    : _ScoreDisplay(emoji: emoji, message: message, r: r, color: color, bonusAssets: _bonusAssets),
                 const SizedBox(height: 24),
                 _StageInfo(stage: widget.stage, elapsed: r.elapsed),
                 if (_newBadges.isNotEmpty) ...[
@@ -321,8 +333,10 @@ class _ScoreDisplay extends StatelessWidget {
   final String message;
   final QuestResult r;
   final Color color;
+  final List<String> bonusAssets;
 
   const _ScoreDisplay({
+    this.bonusAssets = const [],
     required this.emoji,
     required this.message,
     required this.r,
@@ -342,9 +356,31 @@ class _ScoreDisplay extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text(emoji, style: const TextStyle(fontSize: 64)),
+          UkalabEmoji(emoji, size: 64),
           const SizedBox(height: 12),
           Text(message, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: kTextDark)),
+          if (r.isPassed) ...[
+            const SizedBox(height: 12),
+            Image.asset(rewardStickerAsset(r.correctCount, r.totalCount),
+                width: 72, height: 72,
+                errorBuilder: (_, __, ___) => const SizedBox.shrink()),
+            if (bonusAssets.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Row(
+                key: const Key('bonus_stickers'),
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  for (final a in bonusAssets)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Image.asset(a,
+                          height: 48,
+                          errorBuilder: (_, __, ___) => const SizedBox.shrink()),
+                    ),
+                ],
+              ),
+            ],
+          ],
           const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -425,7 +461,7 @@ class _StageInfo extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: kBgLight,
+        color: context.isDarkMode ? kBgDark2 : kBgLight,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -452,9 +488,9 @@ class _InfoItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(label, style: const TextStyle(color: kTextMuted, fontSize: 11)),
+        Text(label, style: TextStyle(color: context.mutedText, fontSize: 11)),
         const SizedBox(height: 4),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: context.strongText)),
       ],
     );
   }
@@ -486,7 +522,7 @@ class _NewBadgesSection extends StatelessWidget {
             children: badges.map((b) => Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(b.emoji, style: const TextStyle(fontSize: 36)),
+                UkalabEmoji(b.emoji, size: 36),
                 const SizedBox(height: 4),
                 Text(b.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
               ],

@@ -8,9 +8,9 @@ const _premiumKey = 'is_premium';
 const _trialStartKey = 'trial_start_date';
 const _trialDays = 14;
 
-/// Google Play 商品ID（コンソールで設定する）
-const kProductIdMonthly = 'kokugo-premium-monthly';
-const kProductIdYearly = 'kokugo-premium-annual';
+/// Google Play 商品ID（Play Consoleで実際に有効な基本プランを持つID）
+const kProductIdMonthly = 'premium_monthly';
+const kProductIdYearly = 'premium_annual2';
 
 /// 無料で遊べる最大ステージ番号
 const kFreeStageLimit = 3;
@@ -44,6 +44,16 @@ class PremiumState {
     this.trialDaysLeft = 0,
     this.isLoading = true,
   });
+
+  /// 無料トライアル中またはプレミアム中は、すべてのコンテンツ・ステージが遊べる。
+  bool get hasFullAccess => isPremium || isTrialActive;
+
+  /// ステージ順のロック（直前のステージ未クリア）。トライアル中・プレミアム中は適用しない。
+  bool isStageOrderLocked({required bool previousCleared}) =>
+      !hasFullAccess && !previousCleared;
+
+  /// 「プレミアム機能」の鍵アイコンを出すか（トライアル中・プレミアム中は出さない）。
+  bool showsPremiumLock(bool itemIsPremium) => itemIsPremium && !hasFullAccess;
 
   bool canAccessStage(int stageNumber) =>
       isPremium || isTrialActive || stageNumber <= kFreeStageLimit;

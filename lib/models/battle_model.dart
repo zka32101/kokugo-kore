@@ -5,7 +5,7 @@ part 'battle_model.freezed.dart';
 part 'battle_model.g.dart';
 
 @freezed
-abstract class Battle with _$Battle {
+class Battle with _$Battle {
   const factory Battle({
     required String battleId,
     required String player1Id,
@@ -26,7 +26,7 @@ abstract class Battle with _$Battle {
 }
 
 @freezed
-abstract class BattleRound with _$BattleRound {
+class BattleRound with _$BattleRound {
   const factory BattleRound({
     required String battleId,
     required int roundNumber,
@@ -47,7 +47,7 @@ abstract class BattleRound with _$BattleRound {
 }
 
 @freezed
-abstract class BattleResult with _$BattleResult {
+class BattleResult with _$BattleResult {
   const factory BattleResult({
     required String battleId,
     required String player1Id,
@@ -65,7 +65,7 @@ abstract class BattleResult with _$BattleResult {
 }
 
 @freezed
-abstract class BattlePlayer with _$BattlePlayer {
+class BattlePlayer with _$BattlePlayer {
   const factory BattlePlayer({
     required String playerId,
     required String displayName,

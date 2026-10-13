@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_core/shared_core.dart' show requireParentalGate;
+import '../services/parental_gate_service.dart';
 import '../providers/premium_provider.dart';
 
 import '../theme/app_theme.dart';
@@ -96,11 +96,7 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
   }
 
   Future<void> _buy(Future<PurchaseAttemptResult> Function() fn) async {
-    final passedGate = await requireParentalGate(
-      context,
-      title: 'ほごしゃかくにん',
-      description: 'プレミアムプランのご購入には、ほごしゃの確認が必要です。',
-    );
+    final passedGate = await ParentalGateService.requireParentalGate(context);
     if (!passedGate || !mounted) return;
     setState(() => _purchasing = true);
     final result = await fn();
@@ -189,8 +185,8 @@ class _FeatureList extends StatelessWidget {
     const features = [
       ('📖', '全ステージ（4・5）無制限アクセス'),
       ('🏅', 'プレミアムバッジコレクション'),
-      ('📊', '詳細な学習レポート（coming soon）'),
-      ('👨‍👩‍👧', '保護者ダッシュボード（coming soon）'),
+      ('📊', '詳細な学習レポート'),
+      ('👨‍👩‍👧', '保護者ダッシュボード'),
     ];
 
     return Column(

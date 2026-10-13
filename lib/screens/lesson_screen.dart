@@ -1,33 +1,13 @@
-// lib/screens/lesson_screen.dart — 「学ぶ」解説メニュー画面
-//
-// shared_core の LessonMenuPage をラップし、表示時に国語の解説記事
-// （lib/data/lesson_data.dart）を lessonProvider へ読み込む。
-
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_core/shared_core.dart' show LessonMenuPage;
-import '../data/lesson_data.dart';
+import 'learn_screen.dart';
 
-import '../providers/lesson_provider.dart';
-
-class LessonScreen extends ConsumerStatefulWidget {
+/// ホームの「学ぶ」カードの遷移先。
+///
+/// 小学校で学ぶ国語の内容（ひらがな・カタカナ、漢字の部首、ことわざ、
+/// 慣用句など。クイズの出題範囲と同じ）を一覧で確認できる [LearnScreen] を表示する。
+class LessonScreen extends StatelessWidget {
   const LessonScreen({super.key});
 
   @override
-  ConsumerState<LessonScreen> createState() => _LessonScreenState();
-}
-
-class _LessonScreenState extends ConsumerState<LessonScreen> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(lessonProvider.notifier).load(kLessons);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return const LessonMenuPage(lessons: kLessons);
-  }
+  Widget build(BuildContext context) => const LearnScreen();
 }

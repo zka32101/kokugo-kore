@@ -1,7 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
-import 'package:shared_core/shared_core.dart' show FeedbackReport;
 
 import '../models/analytics_model.dart';
 import '../models/friend_model.dart';
@@ -237,6 +236,33 @@ class FirebaseRealtimeAPI {
         });
   }
 
+  /// Remove a friend request (承認・却下いずれの場合も呼び出す)
+  static Future<void> removeFriendRequest(String userId, String requestId) async {
+    try {
+      final ref = _db.ref(
+        '${FirebaseRealtimeDB.userFriendRequestsPath(userId)}/$requestId',
+      );
+      await ref.remove();
+    } catch (e) {
+      debugPrint('❌ Error removing friend request: $e');
+      rethrow;
+    }
+  }
+
+  /// 招待コード（相手のuserId）からプロフィールを検索する。
+  /// 見つからない場合は null を返す。
+  static Future<Map<String, dynamic>?> findUserProfileById(String userId) async {
+    try {
+      final ref = _db.ref(FirebaseRealtimeDB.userProfilePath(userId));
+      final snapshot = await ref.get();
+      if (!snapshot.exists) return null;
+      return Map<String, dynamic>.from(snapshot.value as Map);
+    } catch (e) {
+      debugPrint('❌ Error finding user profile: $e');
+      return null;
+    }
+  }
+
   // ===== Battles API =====
 
   /// Create battle
@@ -280,15 +306,16 @@ class FirebaseRealtimeAPI {
 
   /// バグ報告・改善要望を feedback/{reportId} に書き込む。
   /// FeedbackNotifier.setSubmitHandler() に登録して使う。
-  static Future<void> submitFeedback(FeedbackReport report) async {
-    try {
-      final ref = _db.ref(FirebaseRealtimeDB.feedbackReportPath(report.id));
-      await ref.set(report.toJson());
-    } catch (e) {
-      debugPrint('❌ Error submitting feedback: $e');
-      rethrow;
-    }
-  }
+  /// TODO: FeedbackReport を shared_core または このファイルで定義してから再実装
+  // static Future<void> submitFeedback(FeedbackReport report) async {
+  //   try {
+  //     final ref = _db.ref(FirebaseRealtimeDB.feedbackReportPath(report.id));
+  //     await ref.set(report.toJson());
+  //   } catch (e) {
+  //     debugPrint('❌ Error submitting feedback: $e');
+  //     rethrow;
+  //   }
+  // }
 
   // ===== Reading API =====
 

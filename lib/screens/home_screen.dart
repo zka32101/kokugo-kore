@@ -20,6 +20,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../providers/profile_provider.dart';
 import '../providers/purchased_items_provider.dart';
 import '../theme/app_theme.dart';
+import '../reward_assets.dart';
+import '../utils/constants.dart';
 import 'package:shared_core/shared_core.dart'
     show
         characterStateProvider,
@@ -33,11 +35,15 @@ import 'package:shared_core/shared_core.dart'
         coinProvider,
         WeeklyBonusWidget,
         NotificationBadge,
-        notificationProvider;
+        NotificationListPage;
 import '../widgets/daily_bonus_dialog.dart';
+import '../widgets/title_plate.dart';
+import '../features/shop/title/title_provider.dart';
 import '../widgets/daily_mission_card.dart';
 import '../widgets/timer_chip_widget.dart';
 import '../widgets/badge_progress_tracker.dart';
+import 'package:kokugo_kore/widgets/ukalab_emoji.dart';
+import '../widgets/streak_calendar.dart';
 
 AppShopItem? _findCommonShopItem(String? id) {
   if (id == null) return null;
@@ -97,7 +103,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _checkForUpdate() async {
-    const currentVersion = '1.4.0';
+    const currentVersion = AppConstants.appVersion;
     final prefs = await SharedPreferences.getInstance();
     final lastSeen = prefs.getString('last_seen_version');
     if (lastSeen != currentVersion) {
@@ -107,13 +113,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         context: context,
         builder: (ctx) => AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Row(
+          title: Row(
             children: [
               Text('🎉', style: TextStyle(fontSize: 28)),
               SizedBox(width: 8),
               Flexible(
-                child: Text('v1.4.0 にアップデート！',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                child: Text('v$currentVersion にアップデート！',
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
               ),
             ],
           ),
@@ -125,16 +131,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 Text('✨ 新機能',
                     style: TextStyle(fontWeight: FontWeight.bold, color: kPrimaryColor)),
                 SizedBox(height: 6),
-                Text('• 読解力強化トレーニングを追加'),
-                Text('• アバターアイコンを一新'),
-                Text('• 書き順アニメーション表示を追加'),
+                Text('• かく練習の採点をお手本の字の形で判定'),
+                Text('• 無料トライアル中はすべてのステージが遊べます'),
                 SizedBox(height: 12),
                 Text('🔧 改善',
                     style: TextStyle(fontWeight: FontWeight.bold, color: kPrimaryColor)),
                 SizedBox(height: 6),
-                Text('• アプリ内課金の価格表示・エラー表示を改善'),
-                Text('• キャラクターのレベル別イラスト表示に対応'),
-                Text('• アプリ名を「小学コレ！国語」に変更'),
+                Text('• プロフィールで無料アイコン4種が選べない不具合を修正'),
+                Text('• まなぶ画面の項目名を省略せず表示'),
               ],
             ),
           ),
@@ -202,6 +206,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         : null;
     final equipped = ref.watch(equippedItemsProvider).equippedByCategory;
     final weeklyBonus = ref.watch(weeklyBonusProvider);
+    final activeTitle = ref.watch(activeTitleProvider);
 
     // ショップで装着中の背景テーマ（shared_core の共通テーマ）があれば優先。
     final equippedThemeId = equipped['背景'];
@@ -263,9 +268,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     end: Alignment.bottomRight,
                   ),
                 ),
+                // 選んだ称号は名前(ツールバー)の真下に出す。
+                child: activeTitle == null
+                    ? null
+                    : Align(
+                        alignment: Alignment.bottomLeft,
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 12, bottom: 2),
+                          child: TitlePlate(name: activeTitle.name, width: 110),
+                        ),
+                      ),
               ),
-              titlePadding: const EdgeInsets.only(left: 56, bottom: 14, right: 16),
-              title: Column(
+            ),
+            titleSpacing: 12,
+            title: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -301,7 +317,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                 ],
               ),
-            ),
             actions: [
               // デイリーミッションボタン（Phase 4.5）
               IconButton(
@@ -337,21 +352,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
               // Phase 4.23: ローカル通知・リマインダーシステム
-              Builder(
-                builder: (context) {
-                  final notifications = ref.watch(notificationProvider);
-                  return GestureDetector(
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('通知: ${notifications.length}件'),
-                          duration: const Duration(seconds: 2),
-                        ),
-                      );
-                    },
-                    child: const NotificationBadge(),
-                  );
-                },
+              Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.notifications_none),
+                    tooltip: '通知',
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const NotificationListPage(),
+                      ),
+                    ),
+                  ),
+                  const Positioned(
+                    right: 6,
+                    top: 6,
+                    child: NotificationBadge(),
+                  ),
+                ],
               ),
               PopupMenuButton(
                 itemBuilder: (context) => [
@@ -501,7 +519,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               ),
                             ),
                             const Text(
-                              '国語の仕組みを解説記事で読んでみよう',
+                              'ひらがな・漢字・ことわざなど、クイズに出る内容を確認しよう',
                               style: TextStyle(color: kTextMuted, fontSize: 11),
                             ),
                           ],
@@ -514,50 +532,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ),
           ),
-          // ── マルチプレイ対戦カード ────────────────────────
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-              child: GestureDetector(
-                onTap: () => Navigator.pushNamed(context, '/multiplayer'),
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  decoration: BoxDecoration(
-                    color: kAccentPurple.withAlpha(20),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: kAccentPurple.withAlpha(60)),
-                  ),
-                  child: Row(
-                    children: [
-                      const Text('⚔️', style: TextStyle(fontSize: 24)),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'マルチプレイ対戦',
-                              style: TextStyle(
-                                color: kAccentPurple,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                              ),
-                            ),
-                            const Text(
-                              'レートが近い相手と国語でリアルタイム対戦しよう',
-                              style: TextStyle(color: kTextMuted, fontSize: 11),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Icon(Icons.chevron_right, color: kAccentPurple.withAlpha(150)),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
+          // 2026-09: マルチプレイ対戦（ともコレ／ランキング／バトルを含む）は
+          // 十分にテストする余裕がないため、いったんホーム画面から非表示にする。
+          // ルート('/multiplayer'等)や画面自体は残してあるので、テストが
+          // 済み次第このカードを復活させれば良い。
           SliverToBoxAdapter(
             child: _StatsRow(
               progress: progress,
@@ -580,7 +558,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: CrossPromoSection(
               currentAppId: 'com.yourwish.shougakukore.kokugo',
               currentCategory: '小学コレ',
-              isChildDirected: true,
               beforeOpenStore: (context) => requireParentalGate(context),
             ),
           ),
@@ -648,7 +625,10 @@ class _StatsRow extends StatelessWidget {
       child: Row(
         children: [
           _StatCard(label: 'れんぞく', value: '${progress.streakDays}日',
-              emoji: '🔥', color: const Color(0xFFE74C3C)),
+              emoji: '🔥', color: const Color(0xFFE74C3C),
+              imageAsset: streakFlameAsset(progress.streakDays),
+              crownAsset: streakCrownAsset(progress.streakDays),
+              onTap: () => showStreakCalendar(context, progress.streakDays)),
           const SizedBox(width: 10),
           _StatCard(label: 'コイン', value: '$coinCount枚',
               emoji: '🪙', color: const Color(0xFFFFB81C)),
@@ -667,7 +647,9 @@ class _StatCard extends StatelessWidget {
   final String emoji;
   final Color color;
   final VoidCallback? onTap;
-  const _StatCard({required this.label, required this.value, required this.emoji, required this.color, this.onTap});
+  final String? imageAsset;
+  final String? crownAsset;
+  const _StatCard({required this.label, required this.value, required this.emoji, required this.color, this.onTap, this.imageAsset, this.crownAsset});
 
   @override
   Widget build(BuildContext context) {
@@ -683,7 +665,23 @@ class _StatCard extends StatelessWidget {
           ),
           child: Column(
             children: [
-              Text(emoji, style: const TextStyle(fontSize: 24)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (imageAsset != null)
+                    Image.asset(imageAsset!, height: 28, width: 28,
+                        errorBuilder: (_, __, ___) => UkalabEmoji(emoji, size: 24))
+                  else
+                    UkalabEmoji(emoji, size: 24),
+                  if (crownAsset != null)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 2),
+                      child: Image.asset(crownAsset!, height: 24, width: 24,
+                          errorBuilder: (_, __, ___) => const SizedBox.shrink()),
+                    ),
+                ],
+              ),
               const SizedBox(height: 4),
               Text(value, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color)),
               Text(label, style: Theme.of(context).textTheme.bodySmall),
@@ -744,7 +742,7 @@ class _RecentCharactersSection extends ConsumerWidget {
                                 height: 36,
                                 child: Image.asset(c.imageAsset!, fit: BoxFit.contain),
                               )
-                            : Text(c.emoji, style: const TextStyle(fontSize: 28)),
+                            : UkalabEmoji(c.emoji, size: 28),
                         const SizedBox(height: 4),
                         Text(c.name,
                             style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold),
@@ -799,3 +797,4 @@ class _FramedAvatar extends StatelessWidget {
     );
   }
 }
+
