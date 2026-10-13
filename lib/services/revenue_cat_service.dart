@@ -16,7 +16,7 @@ class RevenueCatConfig {
   );
   static const String premiumEntitlementId = String.fromEnvironment(
     'REVENUE_CAT_ENTITLEMENT_ID',
-    defaultValue: 'premium',
+    defaultValue: '小学コレ_pro',
   );
 }
 
