@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_core/models/badge_model.dart';
 
 import '../theme/app_theme.dart';
+import 'package:kokugo_kore/widgets/ukalab_emoji.dart';
+import 'package:kokugo_kore/widgets/badge_emblem.dart';
 
 class BadgeWidget extends StatelessWidget {
   final EarnedBadge earnedBadge;
@@ -108,6 +110,14 @@ class _BadgeIconImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (BadgeEmblem.emblemOf(badgeId) != null) {
+      return SizedBox(
+        width: 64,
+        height: 64,
+        child: BadgeEmblem(badgeId: badgeId, fallbackEmoji: fallbackEmoji, size: 64),
+      );
+    }
+
     final imagePath = 'packages/shared_core/assets/badge_icons/badge_$badgeId.jpg';
 
     return SizedBox(
@@ -119,10 +129,7 @@ class _BadgeIconImage extends StatelessWidget {
         errorBuilder: (context, error, stackTrace) {
           // 画像が見つからない場合は絵文字で代替
           return Center(
-            child: Text(
-              fallbackEmoji,
-              style: const TextStyle(fontSize: 40),
-            ),
+            child: UkalabEmoji(fallbackEmoji, size: 40),
           );
         },
       ),

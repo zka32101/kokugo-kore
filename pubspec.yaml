@@ -4,7 +4,6 @@ publish_to: 'none'
 
 version: 1.5.4+25
 
-# Build trigger for shared_core APK integration - 2026-09-13 10:29
 environment:
   sdk: ^3.9.0
 
@@ -18,25 +17,24 @@ dependencies:
   cross_promo_kit:
     git:
       url: https://github.com/zka32101/cross_promo_kit.git
-      ref: v0.3.0
+      ref: v0.2.0
   cupertino_icons: ^1.0.8
   flutter_riverpod: ^2.6.1
   shared_preferences: ^2.3.0
   intl: ^0.20.3
   confetti: ^0.8.0
-  firebase_core: ^4.14.0
+  firebase_core: ^4.15.0
   firebase_auth: ^6.7.0
-  firebase_database: ^12.0.0
+  firebase_database: ^12.6.0
   firebase_remote_config: ^6.7.0 # Phase 4.12-4.14: Dynamic Pricing・Retention・Multiplayer 設定
   cloud_firestore: ^6.10.0 # shared_core のマルチプレイ対戦(レートマッチング)用 FirestoreMatchmakingService
-  cloud_functions: ^6.5.0
   in_app_purchase: ^3.2.0
   google_fonts: ^6.2.1
   flutter_tts: ^4.0.2
   uuid: ^4.0.0
   gal: ^2.2.0
   freezed_annotation: ^3.0.0
-  json_annotation: ^4.12.0
+  json_annotation: ^4.9.0
   fl_chart: ^0.67.0
   path_drawing: ^1.0.1 # SVG path 'd' string parsing for stroke-order playback
   flutter_svg: ^2.0.10+1 # shared_core のショップアイテム(テーマ/フレーム)SVG表示用
@@ -55,23 +53,31 @@ dev_dependencies:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/logos/app_icon_512.jpg"
+  image_path: "assets/app_icon/icon_kokugo.png"
   min_sdk_android: 21
-  adaptive_icon_background: "#FFFFFF"
-  adaptive_icon_foreground: "assets/logos/app_icon_512.jpg"
+  adaptive_icon_background: "assets/app_icon/adaptive_bg_kokugo.png"
+  adaptive_icon_foreground: "assets/app_icon/adaptive_fg_kokugo.png"
 
 flutter:
   uses-material-design: true
 
   assets:
+    - assets/branding/
+    - assets/icons_common/
+    - assets/shop/
+    - assets/shop/thumb/
+    - assets/illustrations/
+    - assets/badges/
     - assets/legal/
     - assets/characters/
     - assets/character_levels/
     - assets/characters_lvmax/
     - assets/logos/
-    - assets/branding/
     - assets/images/
     - assets/backgrounds/
+    - assets/celebrate/
+    - assets/reward/
+    - assets/title_plate/
 
 # url_launcher(クロスプロモーション用)が引き込む最新の url_launcher_android は
 # androidx.core 1.17.0 / androidx.browser 1.9.0 を要求し AGP 8.9.1+ が必要になるが、

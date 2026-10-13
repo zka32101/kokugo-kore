@@ -1,4 +1,3 @@
-// BadgeRarity は shared_core から import します
 import 'package:shared_core/models/badge_model.dart' show BadgeRarity;
 
 /// バッジの獲得進捗情報

@@ -5,7 +5,7 @@ part 'friend_model.freezed.dart';
 part 'friend_model.g.dart';
 
 @freezed
-abstract class Friend with _$Friend {
+class Friend with _$Friend {
   const factory Friend({
     required String userId,
     required String displayName,
@@ -21,7 +21,7 @@ abstract class Friend with _$Friend {
 }
 
 @freezed
-abstract class FriendRequest with _$FriendRequest {
+class FriendRequest with _$FriendRequest {
   const factory FriendRequest({
     required String requestId,
     required String senderId,
@@ -37,7 +37,7 @@ abstract class FriendRequest with _$FriendRequest {
 }
 
 @freezed
-abstract class FriendComparison with _$FriendComparison {
+class FriendComparison with _$FriendComparison {
   const factory FriendComparison({
     required String userId,
     required String friendId,

@@ -1,4 +1,4 @@
-name: Deploy - Build & Upload
+﻿name: Deploy - Build & Upload
 
 on:
   workflow_dispatch:
@@ -14,24 +14,11 @@ on:
           - debug
 
 jobs:
-  secrets:
-    if: inputs.deploy_type != 'debug'
-    uses: zka32101/shared_core/.github/workflows/secure-secrets-inject.yml@main
-    permissions:
-      id-token: write
-      contents: read
-    with:
-      app_name: kokugo-kore
-      gcp_project_id: shougakukore
-      gcp_service_account: kokugo-kore-ci-bot@shougakukore.iam.gserviceaccount.com
-      gcp_wif_provider: projects/533411745674/locations/global/workloadIdentityPools/kokugo-kore-github-pool/providers/kokugo-kore-github-provider
-      secret_keys: "revenuecat-api-key,android-keystore-base64,android-keystore-password,android-key-password,play-console-sa-key"
-
   deploy:
     name: Deploy (${{ inputs.deploy_type }})
-    needs: [secrets]
-    if: always() && (needs.secrets.result == 'success' || needs.secrets.result == 'skipped')
     runs-on: windows-latest
+    permissions:
+      id-token: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -48,11 +35,33 @@ jobs:
           flutter-version: '3.44.4'
           channel: 'stable'
 
+      - name: Authenticate to Google Cloud (WIF)
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: 'projects/1234567890/locations/global/workloadIdentityPools/github-actions/providers/github-provider'
+          service_account: 'kokugo-kore-ci-bot@shougakukore.iam.gserviceaccount.com'
+          token_format: 'access_token'
+          access_token_lifetime: '600s'
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Retrieve secrets from Secret Manager
+        run: |
+          $keystoreBase64 = gcloud secrets versions access latest --secret="kokugo-kore-android-keystore-base64" --project="shougakukore"
+          "ANDROID_KEYSTORE_BASE64=$keystoreBase64" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          $keystorePassword = gcloud secrets versions access latest --secret="kokugo-kore-android-keystore-password" --project="shougakukore"
+          "KEYSTORE_PASSWORD=$keystorePassword" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          $keyPassword = gcloud secrets versions access latest --secret="kokugo-kore-android-key-password" --project="shougakukore"
+          "KEY_PASSWORD=$keyPassword" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          $revenueCatKey = gcloud secrets versions access latest --secret="kokugo-kore-revenuecat-api-key" --project="shougakukore"
+          "REVENUE_CAT_API_KEY=$revenueCatKey" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          Write-Host "✓ Secrets retrieved from Secret Manager"
+        shell: powershell
+
       - name: Get dependencies
         run: flutter pub get
 
-      - name: Generate code (build_runner)
-        run: flutter pub run build_runner build --delete-conflicting-outputs
 
       - name: Analyze code
         run: flutter analyze --no-fatal-infos --no-fatal-warnings
@@ -74,22 +83,6 @@ jobs:
           }
         shell: powershell
 
-      - name: Parse secrets from Secret Manager
-        if: inputs.deploy_type != 'debug'
-        env:
-          SECRETS_JSON: ${{ needs.secrets.outputs.secrets_json }}
-        run: |
-          $secrets = $env:SECRETS_JSON | ConvertFrom-Json
-          foreach ($prop in $secrets.PSObject.Properties) {
-            Write-Host "::add-mask::$($prop.Value)"
-          }
-          "REVENUECAT_API_KEY=$($secrets.REVENUECAT_API_KEY)" >> $env:GITHUB_ENV
-          "ANDROID_KEYSTORE_BASE64=$($secrets.ANDROID_KEYSTORE_BASE64)" >> $env:GITHUB_ENV
-          "KEYSTORE_PASSWORD=$($secrets.ANDROID_KEYSTORE_PASSWORD)" >> $env:GITHUB_ENV
-          "KEY_PASSWORD=$($secrets.ANDROID_KEY_PASSWORD)" >> $env:GITHUB_ENV
-          Set-Content -Path "$env:RUNNER_TEMP\play-console-sa-key.json" -Value $secrets.PLAY_CONSOLE_SA_KEY
-        shell: powershell
-
       - name: Create keystore directory
         run: |
           if (!(Test-Path "android\keystore")) {
@@ -99,8 +92,8 @@ jobs:
 
       - name: Decode and write keystore
         run: |
-          if ("$env:ANDROID_KEYSTORE_BASE64" -ne "") {
-            $bytes = [Convert]::FromBase64String($env:ANDROID_KEYSTORE_BASE64)
+          if ("${{ env.ANDROID_KEYSTORE_BASE64 }}" -ne "") {
+            $bytes = [Convert]::FromBase64String("${{ env.ANDROID_KEYSTORE_BASE64 }}")
             [System.IO.File]::WriteAllBytes("android\keystore\release_new.jks", $bytes)
             Write-Host "✓ Keystore decoded"
           } else {
@@ -108,7 +101,7 @@ jobs:
           }
         shell: powershell
 
-      - name: "Map K: drive (Japanese path workaround)"
+      - name: Map K: drive (Japanese path workaround)
         run: |
           $projectPath = "${{ github.workspace }}"
           subst K: $projectPath
@@ -119,11 +112,13 @@ jobs:
       - name: Build APK (Release)
         if: inputs.deploy_type == 'release' || inputs.deploy_type == 'internal'
         env:
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          REVENUE_CAT_API_KEY: ${{ secrets.REVENUE_CAT_API_KEY }}
           JAVA_HOME: ${{ env.JAVA_HOME }}
         run: |
           cd K:/
-          flutter build apk --release --no-pub `
-            --dart-define=REVENUE_CAT_API_KEY=$env:REVENUECAT_API_KEY
+          flutter build apk --release --no-pub
           Write-Host "✓ Release APK built"
         shell: powershell
 
@@ -131,11 +126,13 @@ jobs:
       - name: Build AAB (Release)
         if: inputs.deploy_type == 'release' || inputs.deploy_type == 'internal'
         env:
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          REVENUE_CAT_API_KEY: ${{ secrets.REVENUE_CAT_API_KEY }}
           JAVA_HOME: ${{ env.JAVA_HOME }}
         run: |
           cd K:/
-          flutter build appbundle --release --no-pub `
-            --dart-define=REVENUE_CAT_API_KEY=$env:REVENUECAT_API_KEY
+          flutter build appbundle --release --no-pub
           Write-Host "✓ Release AAB built"
         shell: powershell
 
@@ -148,25 +145,44 @@ jobs:
           Write-Host "✓ Debug APK built"
         shell: powershell
 
-      - name: "Unmount K: drive"
+      # Google Play Upload (Internal Track)
+      - name: Setup Ruby for fastlane
+        if: inputs.deploy_type == 'internal'
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+          working-directory: 'android'
+
+      - name: Install fastlane
+        if: inputs.deploy_type == 'internal'
+        run: gem install fastlane -NV
+        shell: pwsh
+
+      - name: Upload to Google Play Internal Track
+        if: inputs.deploy_type == 'internal'
+        env:
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          if ("${{ env.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}" -eq "") {
+            Write-Host "⚠️ GOOGLE_PLAY_SERVICE_ACCOUNT_JSON not set"
+            exit 0
+          }
+
+          $jsonPath = "android/fastlane/google_play_key.json"
+          Set-Content -Path $jsonPath -Value "${{ env.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}"
+
+          cd android
+          fastlane android internal_track
+          Remove-Item -Path "fastlane/google_play_key.json" -Force
+          Write-Host "✓ Uploaded to internal track"
+        shell: pwsh
+
+      - name: Unmount K: drive
         if: always()
         run: |
           subst K: /d
           Write-Host "✓ K: drive unmounted"
-        shell: powershell
-
-      - name: Upload to Google Play Internal Track
-        if: inputs.deploy_type == 'internal'
-        uses: r0adkll/upload-google-play@eb49699984a39f23558439581660aa6f088acfd6 # v1
-        with:
-          serviceAccountJson: ${{ runner.temp }}\play-console-sa-key.json
-          packageName: com.yourwish.shougakukore.kokugo
-          releaseFiles: build/app/outputs/bundle/release/app-release.aab
-          track: internal
-
-      - name: Clean up Play Console key file
-        if: always() && inputs.deploy_type == 'internal'
-        run: Remove-Item -Path "$env:RUNNER_TEMP\play-console-sa-key.json" -ErrorAction SilentlyContinue
         shell: powershell
 
       # Upload artifacts

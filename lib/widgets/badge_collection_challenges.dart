@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_core/models/badge_model.dart';
 import '../models/badge_challenge_model.dart';
@@ -6,6 +6,7 @@ import '../models/badge_challenge_model.dart';
 import '../models/badge_progress_model.dart';
 import '../providers/badge_provider.dart';
 import '../theme/app_theme.dart';
+import 'package:kokugo_kore/widgets/ukalab_emoji.dart';
 
 /// バッジコレクションチャレンジ表示ウィジェット
 class BadgeCollectionChallenges extends ConsumerWidget {
@@ -363,7 +364,7 @@ class BadgeCollectionStats extends ConsumerWidget {
   }) {
     return Column(
       children: [
-        Text(icon, style: const TextStyle(fontSize: 18)),
+        UkalabEmoji(icon, size: 18),
         const SizedBox(height: 4),
         Text(
           value,
@@ -393,10 +394,10 @@ class BadgeCollectionStats extends ConsumerWidget {
   Color _getRarityColor(BadgeRarity rarity) {
     return switch (rarity) {
       BadgeRarity.common => Colors.grey,
-      BadgeRarity.uncommon => Colors.green,
-      BadgeRarity.rare => Colors.purple,
-      BadgeRarity.legendary => Colors.orange,
-      BadgeRarity.mythic => Colors.amber,
+      BadgeRarity.uncommon => Colors.purple,
+      BadgeRarity.rare => Colors.orange,
+      BadgeRarity.legendary => Colors.amber,
+      BadgeRarity.mythic => Colors.black54,
     };
   }
 }

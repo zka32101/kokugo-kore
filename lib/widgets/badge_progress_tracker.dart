@@ -29,7 +29,7 @@ class BadgeProgressTracker extends ConsumerWidget {
           child: Column(
             children: [
               const Text(
-                '🎯 つぎのバッジを めざそう！',
+                '🎯 あと少しのバッジはありません',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
@@ -38,7 +38,7 @@ class BadgeProgressTracker extends ConsumerWidget {
               ),
               const SizedBox(height: 8),
               const Text(
-                'もんだいを ときすすめると、バッジに ちかづくよ！',
+                'もっと学習してバッジに近づきましょう！',
                 style: TextStyle(
                   fontSize: 12,
                   color: kTextMuted,

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../screens/drawing_canvas_screen.dart';
 
 import '../theme/app_theme.dart';
+import '../features/shop/decor/decor_scope.dart';
 
 enum _WritingMode { hiragana, katakana, kanji }
 
@@ -90,7 +91,7 @@ class _WritingScreenState extends State<WritingScreen> {
         automaticallyImplyLeading: false,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
-      backgroundColor: kBgLight,
+      backgroundColor: DecorScope.pageBg(context, kBgLight),
       body: Column(
         children: [
           // Mode selector
@@ -126,8 +127,8 @@ class _WritingScreenState extends State<WritingScreen> {
               children: [
                 Text(
                   '$_correct / $total クリア',
-                  style: const TextStyle(
-                      fontSize: 13, fontWeight: FontWeight.bold, color: kTextDark),
+                  style: TextStyle(
+                      fontSize: 13, fontWeight: FontWeight.bold, color: context.strongText),
                 ),
                 const SizedBox(width: 12),
                 Expanded(

@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/vocab_mastery_provider.dart';
 
+import '../providers/premium_provider.dart';
 import '../theme/app_theme.dart';
+import '../utils/shuffle_choices.dart';
 
 class VocabQuestion {
   final String word;
@@ -1133,12 +1135,12 @@ class _RuntimeVQ {
   });
 
   static _RuntimeVQ from(VocabQuestion q) {
-    final correct = q.choices[q.correctIndex];
-    final shuffled = List.of(q.choices)..shuffle(math.Random());
+    final order = shuffledOrder(q.choices);
+    final shuffled = [for (final i in order) q.choices[i]];
     return _RuntimeVQ(
       original: q,
       shuffledChoices: shuffled,
-      shuffledCorrectIndex: shuffled.indexOf(correct),
+      shuffledCorrectIndex: order.indexOf(q.correctIndex),
     );
   }
 }
@@ -1458,12 +1460,12 @@ class _VocabularyScreenState extends ConsumerState<VocabularyScreen>
                 style: const TextStyle(fontSize: 64),
               ),
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 '結果',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: kTextDark,
+                  color: context.strongText,
                 ),
               ),
               const SizedBox(height: 12),

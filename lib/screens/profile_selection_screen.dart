@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_core/models/avatar_model.dart';
 import 'package:shared_core/widgets/avatar_widget.dart';
-import 'package:shared_core/shared_core.dart' show requireParentalGate;
+import '../services/parental_gate_service.dart';
 import '../providers/profile_provider.dart';
 
 import '../providers/profile_avatar_provider.dart';
 import '../providers/avatar_unlock_provider.dart';
 import '../theme/app_theme.dart';
+import '../features/shop/decor/decor_scope.dart';
 
 class ProfileSelectionScreen extends ConsumerStatefulWidget {
   const ProfileSelectionScreen({super.key});
@@ -43,8 +44,8 @@ class _ProfileSelectionScreenState extends ConsumerState<ProfileSelectionScreen>
             spacing: 8,
             runSpacing: 8,
             children: allAvatars.map((avatar) {
-              final avatarUnlock = ref.read(avatarUnlockProvider);
-              final isUnlocked = avatarUnlock[avatar.id] ?? false;
+                            final isUnlocked =
+                          ref.read(avatarUnlockProvider.notifier).isAvatarUnlocked(avatar.id);
             return GestureDetector(
               onTap: isUnlocked
                   ? () async {
@@ -53,7 +54,7 @@ class _ProfileSelectionScreenState extends ConsumerState<ProfileSelectionScreen>
                     }
                   : () => ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('ショップで購入するとつかえます！'),
+                          content: Text('コレショップでコインと交換するとつかえます！'),
                           duration: Duration(seconds: 1),
                         ),
                       ),
@@ -67,10 +68,9 @@ class _ProfileSelectionScreenState extends ConsumerState<ProfileSelectionScreen>
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: Colors.grey.shade300),
                     ),
-                    child: AvatarImage(
-                      avatar: avatar,
-                      size: 48,
+                    child: Opacity(
                       opacity: isUnlocked ? 1.0 : 0.4,
+                      child: AvatarImage(avatar: avatar, size: 48),
                     ),
                   ),
                   if (!isUnlocked)
@@ -134,19 +134,19 @@ class _ProfileSelectionScreenState extends ConsumerState<ProfileSelectionScreen>
                     spacing: 8,
                     runSpacing: 8,
                     children: allAvatars.map((avatar) {
-                      final avatarUnlock = ref.read(avatarUnlockProvider);
-                      final isUnlocked = avatarUnlock[avatar.id] ?? false;
+                                            final isUnlocked =
+                          ref.read(avatarUnlockProvider.notifier).isAvatarUnlocked(avatar.id);
                       final selected = _selectedAvatarId == avatar.id;
                       return GestureDetector(
                         onTap: isUnlocked
                             ? () => setDialogState(() => _selectedAvatarId = avatar.id)
                             : () => ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text('ショップで購入するとつかえます！'),
+                                    content: Text('コレショップでコインと交換するとつかえます！'),
                                     duration: Duration(seconds: 1),
                                   ),
                                 ),
-                        child: Stack(
+                        child: Column(mainAxisSize: MainAxisSize.min, children: [Stack(
                           children: [
                             Container(
                               width: 44,
@@ -161,10 +161,9 @@ class _ProfileSelectionScreenState extends ConsumerState<ProfileSelectionScreen>
                                   width: selected ? 2 : 1,
                                 ),
                               ),
-                              child: AvatarImage(
-                                avatar: avatar,
-                                size: 44,
+                              child: Opacity(
                                 opacity: isUnlocked ? 1.0 : 0.4,
+                                child: AvatarImage(avatar: avatar, size: 44),
                               ),
                             ),
                             if (!isUnlocked)
@@ -175,6 +174,12 @@ class _ProfileSelectionScreenState extends ConsumerState<ProfileSelectionScreen>
                               ),
                           ],
                         ),
+                          if (!isUnlocked)
+                            Text('${avatar.coinCost ?? 0}コイン',
+                                style: const TextStyle(fontSize: 9, color: Colors.grey))
+                          else
+                            const SizedBox(height: 11),
+                        ]),
                       );
                     }).toList(),
                   );
@@ -263,9 +268,12 @@ class _ProfileSelectionScreenState extends ConsumerState<ProfileSelectionScreen>
                 return Card(
                   margin: const EdgeInsets.only(bottom: 12),
                   child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: kPrimaryColor.withAlpha(30),
-                      child: AvatarImage(avatar: avatarModel, size: 40),
+                    leading: DecorFrame(
+                      size: 40,
+                      child: CircleAvatar(
+                        backgroundColor: kPrimaryColor.withAlpha(30),
+                        child: AvatarImage(avatar: avatarModel, size: 40),
+                      ),
                     ),
                     title: Text(profile.name),
                     subtitle: Text('${profile.grade}年生'),
@@ -277,11 +285,7 @@ class _ProfileSelectionScreenState extends ConsumerState<ProfileSelectionScreen>
                       onSelected: (val) async {
                         if (val == 'delete') {
                           if (profiles.length > 1) {
-                            final passedGate = await requireParentalGate(
-                              context,
-                              title: 'ほごしゃかくにん',
-                              description: 'プロフィールの削除には、ほごしゃの確認が必要です。',
-                            );
+                            final passedGate = await ParentalGateService.requireParentalGate(context);
                             if (!passedGate || !context.mounted) return;
                             await ref.read(profileProvider.notifier).deleteProfile(profile.id);
                           }

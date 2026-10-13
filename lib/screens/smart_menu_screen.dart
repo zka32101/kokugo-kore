@@ -8,7 +8,9 @@ import '../providers/learning_timer_provider.dart';
 import '../providers/profile_provider.dart';
 import '../providers/progress_provider.dart';
 import '../theme/app_theme.dart';
+import 'package:kokugo_kore/widgets/ukalab_emoji.dart';
 
+import '../features/shop/decor/decor_scope.dart';
 // ─── 難易度モード ─────────────────────────────────────────────
 enum _Difficulty { easy, normal, hard }
 
@@ -231,7 +233,7 @@ class _SmartMenuScreenState extends ConsumerState<SmartMenuScreen> {
     final grade = profile?.grade ?? 3;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: DecorScope.pageBg(context, const Color(0xFFF5F5F5)),
       appBar: AppBar(
         backgroundColor: kPrimaryColor,
         foregroundColor: Colors.white,
@@ -652,8 +654,7 @@ class _DifficultyCard extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Text(difficulty.emoji,
-                style: const TextStyle(fontSize: 26)),
+            UkalabEmoji(difficulty.emoji, size: 26),
             const SizedBox(height: 6),
             Text(
               difficulty.label,

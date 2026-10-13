@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
+import '../widgets/explanation_image.dart';
+import 'package:kokugo_kore/widgets/ukalab_emoji.dart';
 
 class LearnScreen extends StatelessWidget {
   const LearnScreen({super.key});
@@ -9,8 +11,9 @@ class LearnScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('わかる'),
-        backgroundColor: const Color(0xFF3498DB),
-        automaticallyImplyLeading: false,
+        backgroundColor: kPrimaryColor,
+        iconTheme: const IconThemeData(color: Colors.white),
+        foregroundColor: Colors.white,
       ),
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 8),
@@ -53,7 +56,7 @@ class _LearnExpansionTile extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ExpansionTile(
-        leading: Text(emoji, style: const TextStyle(fontSize: 22)),
+        leading: UkalabEmoji(emoji, size: 22),
         title: Text(
           title,
           style: const TextStyle(
@@ -786,6 +789,10 @@ class _ProverbSection extends StatelessWidget {
     ('二度あることは三度ある（にどあることはさんどある）', '同（おな）じことが繰（く）り返（かえ）されやすい'),
     ('笑う門には福来たる（わらうかどにはふくきたる）', '笑（わら）いの絶（た）えない家（いえ）には幸（しあわ）せがやってくる'),
     ('早起きは三文の徳（はやおきはさんもんのとく）', '朝（あさ）早（はや）く起（お）きると良（よ）いことがある'),
+    ('鬼に金棒（おににかなぼう）', '強（つよ）い人（ひと）が、さらに強（つよ）い武器（ぶき）を持（も）って、もっと強（つよ）くなること'),
+    ('泣きっ面に蜂（なきっつらにはち）', '困（こま）っているときに、さらに悪（わる）いことが重（かさ）なること'),
+    ('棚からぼた餅（たなからぼたもち）', '思（おも）いがけない幸運（こううん）がまいこむこと'),
+    ('頭隠して尻隠さず（あたまかくしてしりかくさず）', '悪（わる）いことの一部（いちぶ）だけを隠（かく）して、全部（ぜんぶ）隠（かく）したつもりになっていること'),
   ];
 
   @override
@@ -829,6 +836,7 @@ class _ProverbSection extends StatelessWidget {
                               p.$2,
                               style: const TextStyle(fontSize: 12, color: kTextMuted),
                             ),
+                            ExplanationImage(p.$1),
                           ],
                         ),
                       ),
@@ -861,6 +869,7 @@ class _YojijukugoSection extends StatelessWidget {
     ('前途多難', 'ぜんとたなん', 'これから先に多くの困難があること'),
     ('温故知新', 'おんこちしん', '古いことを学んで新しいことに活かすこと'),
     ('切磋琢磨', 'せっさたくま', 'お互いに競い合い高め合うこと'),
+    ('弱肉強食', 'じゃくにくきょうしょく', '弱い者が強い者にえさとして食べられてしまう、強い者だけが栄えること'),
   ];
 
   @override
@@ -910,6 +919,7 @@ class _YojijukugoSection extends StatelessWidget {
                               Text(e.$3,
                                   style: const TextStyle(
                                       fontSize: 12, color: kTextMuted)),
+                              ExplanationImage(e.$1),
                             ],
                           ),
                         ),
@@ -1225,6 +1235,7 @@ class _IdiomSection extends StatelessWidget {
     ('肩（かた）の荷（に）が下（お）りる', '心配（しんぱい）がなくなること'),
     ('腹（はら）を割（わ）る', '本音（ほんね）で話（はな）し合（あ）うこと'),
     ('気（き）が置（お）けない', '気（き）を使（つか）わなくてよいこと'),
+    ('頭（あたま）を抱（かか）える', 'よい方法（ほうほう）が見（み）つからず、とても困（こま）ること'),
   ];
 
   @override
@@ -1268,6 +1279,7 @@ class _IdiomSection extends StatelessWidget {
                               item.$2,
                               style: const TextStyle(fontSize: 12, color: kTextMuted),
                             ),
+                            ExplanationImage(item.$1),
                           ],
                         ),
                       ),

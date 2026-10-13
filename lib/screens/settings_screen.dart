@@ -1,10 +1,13 @@
-﻿import 'package:flutter/material.dart';
+﻿import 'package:kokugo_kore/features/shop/decor/decor_scope.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_core/shared_core.dart'
     show
-        AnalyticsDashboard,
+        AnalyticsDashboardWidget,
+        AccuracyTrendData,
         AddFriendDialog,
         CrossPromoSection,
+        DailyActivityData,
         FeedbackFormPage,
         NotificationSettingsPage,
         requireParentalGate,
@@ -25,11 +28,20 @@ import '../providers/ranking_privacy_provider.dart';
 import '../providers/vocab_mastery_provider.dart';
 import '../providers/profile_provider.dart';
 import '../theme/app_theme.dart';
+import '../utils/constants.dart';
 import '../widgets/app_intro_dialog.dart';
+import 'detailed_analytics_screen.dart';
+import 'package:kokugo_kore/widgets/ukalab_emoji.dart';
 
-const _appVersion = '1.4.0';
+const _appVersion = AppConstants.appVersion;
 
 const _changelog = <String, List<String>>{
+  '1.5.1': [
+    'かく練習の採点を、お手本の字の形との一致で判定するように変更',
+    'プロフィール追加で、無料の4種類のアイコンを選べるように修正',
+    '無料トライアル中は、すべてのステージ・学習メニューが遊べるように修正',
+    'まなぶ画面の項目名を省略せず表示、画面の表示崩れを修正',
+  ],
   '1.4.0': [
     'アプリ名を「小学コレ！国語」に変更',
     '読解力強化トレーニングを実際の記事・クイズと接続',
@@ -160,6 +172,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> with TickerProv
         automaticallyImplyLeading: false,
         bottom: TabBar(
           controller: _tabController,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          indicatorColor: Colors.white,
           tabs: const [
             Tab(text: '設定'),
             Tab(text: '学習分析'),
@@ -287,16 +302,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> with TickerProv
             subtitle: const Text('通知の受け取り設定を管理',
                 style: TextStyle(fontSize: 11)),
             trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: kTextMuted),
-            onTap: () {
-              final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
-              if (userId.isNotEmpty) {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const NotificationSettingsPage(),
-                  ),
-                );
-              }
-            },
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => const NotificationSettingsPage(),
+              ),
+            ),
           ),
           const Divider(),
           _SectionHeader(title: '📈 分析'),
@@ -308,34 +318,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> with TickerProv
             trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: kTextMuted),
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (_) => RetentionDashboard(userId: FirebaseAuth.instance.currentUser?.uid ?? ''),
+                builder: (_) => RetentionDashboard(
+                  userId: FirebaseAuth.instance.currentUser?.uid ?? '',
+                ),
               ),
             ),
           ),
-          const Divider(),
-          _SectionHeader(title: 'ソーシャル'),
-          ListTile(
-            leading: const Icon(Icons.person_add, color: kPrimaryColor),
-            title: const Text('フレンドを探す'),
-            subtitle: const Text('ユーザーを検索してフレンド申請する', style: TextStyle(fontSize: 11)),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 14, color: kTextMuted),
-            onTap: () => showDialog(
-              context: context,
-              builder: (context) => const AddFriendDialog(),
-            ),
-          ),
+          // 2026-09: マルチプレイ／ともコレ／ランキング／バトルは十分に
+          // テストする余裕がないため、せっていからもいったん非表示にする
+          // （home_screen.dart のマルチプレイ対戦カードと同様）。
+          // ウィジェット・ルート自体は残してあるので、テストが済み次第
+          // このブロックを復活させれば良い。
           const Divider(),
           _SectionHeader(title: 'テーマ'),
           const _ThemeSection(),
-          const Divider(),
-          _SectionHeader(title: 'ともコレ'),
-          const _TomoKoreSection(),
-          const Divider(),
-          _SectionHeader(title: 'ランキング設定'),
-          const _RankingPrivacySection(),
-          const Divider(),
-          _SectionHeader(title: 'バトル設定'),
-          const _BattleSettingsSection(),
           const Divider(),
           _SectionHeader(title: 'アプリについて'),
           ListTile(
@@ -416,7 +412,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> with TickerProv
           CrossPromoSection(
             currentAppId: 'com.yourwish.shougakukore.kokugo',
             currentCategory: '小学コレ',
-            isChildDirected: true,
             beforeOpenStore: (context) => requireParentalGate(context),
           ),
           const Divider(),
@@ -438,16 +433,42 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> with TickerProv
         ],
           ),
           // Tab 2: 学習分析
-          SingleChildScrollView(
+          ListView(
             padding: const EdgeInsets.all(16),
-            child: AnalyticsDashboard(
-              userId: currentProfile?.id ??
-                  FirebaseAuth.instance.currentUser?.uid ??
-                  '',
-              primaryColor: kPrimaryColor,
-            ),
+            children: [
+              _summaryTile(Icons.check_circle, 'これまでの正解数', '${progress.totalCorrect}もん'),
+              _summaryTile(Icons.local_fire_department, 'れんぞく学習', '${progress.streakDays}にち'),
+              _summaryTile(Icons.flag, 'クリアしたステージ', '${progress.clearedStageIds.length}こ'),
+              _summaryTile(Icons.star, 'パーフェクト', '${progress.perfectStageCount}かい'),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.analytics),
+                label: const Text('くわしい分析を見る'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: kPrimaryColor,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const DetailedAnalyticsScreen()),
+                ),
+              ),
+            ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _summaryTile(IconData icon, String label, String value) {
+    return Card(
+      child: ListTile(
+        leading: Icon(icon, color: kPrimaryColor),
+        title: Text(label),
+        trailing: Text(
+          value,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
       ),
     );
   }
@@ -710,14 +731,14 @@ class _UsageItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(emoji, style: const TextStyle(fontSize: 18)),
+          UkalabEmoji(emoji, size: 18),
           const SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(title,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: kTextDark)),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: context.strongText)),
                 const SizedBox(height: 2),
                 Text(desc,
                     style: const TextStyle(fontSize: 12, color: kTextMuted, height: 1.4)),
@@ -736,11 +757,8 @@ class _TomoKoreSection extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profileState = ref.watch(profileProvider);
-    final referral = ref.watch(referralProvider);
     final currentUserId = profileState.currentProfile?.id ?? 'unknown';
-    final myCode = referral.codes
-        .firstWhere((c) => c.generatorId == currentUserId, orElse: () => ReferralCode(code: '', generatorId: ''))
-        .code;
+    final myCode = currentUserId == 'unknown' ? '' : currentUserId;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -861,8 +879,6 @@ class _TomoKoreSection extends ConsumerWidget {
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
-              textCapitalization: TextCapitalization.characters,
-              onChanged: (val) => codeController.text = val.toUpperCase(),
             ),
           ],
         ),
@@ -875,7 +891,7 @@ class _TomoKoreSection extends ConsumerWidget {
             onPressed: () async {
               final success = await ref.read(referralProvider.notifier).useReferralCode(codeController.text, currentUserId);
               if (success) {
-                final coins = ref.read(referralProvider).findCodeByValue(codeController.text)?.coinsReward ?? 10;
+                const coins = kReferralCoinsReward;
                 await ref.read(coinProvider.notifier).addCoins(coins);
                 if (ctx.mounted) {
                   Navigator.pop(ctx);
@@ -961,13 +977,23 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 4),
-      child: Text(
-        title,
-        style: const TextStyle(
-          color: kPrimaryColor,
-          fontWeight: FontWeight.bold,
-          fontSize: 13,
-          letterSpacing: 0.5,
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+          decoration: BoxDecoration(
+            color: DecorScope.chipBg(context),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Text(
+            title,
+            style: const TextStyle(
+              color: kPrimaryColor,
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+              letterSpacing: 0.5,
+            ),
+          ),
         ),
       ),
     );
@@ -996,8 +1022,7 @@ class _RankingPrivacySection extends ConsumerWidget {
                   style: TextStyle(fontSize: 11),
                 ),
                 value: privacy.isNamePublic,
-                onChanged: (value) =>
-                    ref.read(rankingPrivacyProvider.notifier).setNamePublic(value),
+                onChanged: (value) => _onNamePublicChanged(context, ref, value),
                 activeColor: kPrimaryColor,
               ),
               if (!privacy.isNamePublic)
@@ -1034,6 +1059,40 @@ class _RankingPrivacySection extends ConsumerWidget {
         ),
       ],
     );
+  }
+
+  Future<void> _onNamePublicChanged(
+      BuildContext context, WidgetRef ref, bool value) async {
+    if (!value) {
+      await ref.read(rankingPrivacyProvider.notifier).setNamePublic(false);
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('⚠️ 名前の公開について'),
+        content: const Text(
+          '設定している名前が他のユーザーにも見えるようになります。\n\n'
+          '本名（苗字・フルネーム）を使っていないか、もう一度確認してください。'
+          'ニックネームなど、本名がわからない名前をおすすめします。',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text('やめる'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text('確認した、表示する'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await ref.read(rankingPrivacyProvider.notifier).setNamePublic(true);
+    }
   }
 }
 

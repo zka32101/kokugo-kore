@@ -1,4 +1,4 @@
-﻿import 'package:collection/collection.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_core/models/badge_model.dart' hide allBadges;
@@ -9,6 +9,7 @@ import '../theme/app_theme.dart';
 import '../widgets/badge_widget.dart';
 import '../widgets/badge_collection_challenges.dart';
 import '../widgets/badge_set_bonus_display.dart';
+import 'package:kokugo_kore/widgets/badge_emblem.dart';
 
 enum BadgeFilterType {
   all('すべて'),
@@ -206,7 +207,7 @@ class _BadgeScreenState extends ConsumerState<BadgeScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(earned.badge.emoji, style: const TextStyle(fontSize: 56)),
+            BadgeEmblem(badgeId: earned.badge.id, fallbackEmoji: earned.badge.emoji, size: 70),
             const SizedBox(height: 12),
             Text(earned.badge.title,
                 style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
@@ -280,7 +281,7 @@ class _BadgeScreenState extends ConsumerState<BadgeScreen> {
                 0.2126, 0.7152, 0.0722, 0, 0,
                 0, 0, 0, 0.4, 0,
               ]),
-              child: Text(badge.emoji, style: const TextStyle(fontSize: 56)),
+              child: BadgeEmblem(badgeId: badge.id, fallbackEmoji: badge.emoji, size: 70),
             ),
             const SizedBox(height: 12),
             Text(badge.title,
@@ -389,10 +390,10 @@ class _BadgeScreenState extends ConsumerState<BadgeScreen> {
   Color _getRarityColor(BadgeRarity rarity) {
     return switch (rarity) {
       BadgeRarity.common => Colors.grey,
-      BadgeRarity.uncommon => Colors.green,
-      BadgeRarity.rare => Colors.purple,
-      BadgeRarity.legendary => Colors.orange,
-      BadgeRarity.mythic => Colors.amber,
+      BadgeRarity.uncommon => Colors.purple,
+      BadgeRarity.rare => Colors.orange,
+      BadgeRarity.legendary => Colors.amber,
+      BadgeRarity.mythic => Colors.black54,
     };
   }
 }

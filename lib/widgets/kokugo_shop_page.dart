@@ -4,12 +4,13 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_core/shared_core.dart' hide kAccentGreen, kTextDark, kTextMuted;
 
 import '../data/kokugo_characters.dart';
-import '../providers/character_provider.dart';
 import '../providers/purchased_items_provider.dart';
 import '../providers/avatar_unlock_provider.dart';
 import '../theme/app_theme.dart';
 import 'character_unlock_dialog.dart';
+import 'package:kokugo_kore/widgets/ukalab_emoji.dart';
 
+import '../features/shop/decor/decor_shop_tab.dart';
 bool _isEquippable(AppShopItem item) => item.kind != ShopItemKind.emoji;
 
 String _currentSeason() {
@@ -38,7 +39,7 @@ class KokugoShopPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: 4,
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
@@ -57,6 +58,7 @@ class KokugoShopPage extends StatelessWidget {
               Tab(icon: Icon(Icons.auto_awesome, size: 18), text: 'キャラ育成'),
               Tab(icon: Icon(Icons.pets, size: 18), text: 'アバター'),
               Tab(icon: Icon(Icons.event, size: 18), text: '期間限定'),
+              Tab(icon: Icon(Icons.palette_outlined, size: 18), text: 'きせかえ'),
             ],
           ),
         ),
@@ -65,6 +67,7 @@ class KokugoShopPage extends StatelessWidget {
             _CharacterLevelUpTab(characters: characters),
             _AvatarTab(avatars: coinUnlockAvatars),
             _SeasonalTab(seasonalItems: seasonalItems),
+            const DecorShopTab(),
           ],
         ),
       ),
@@ -99,14 +102,14 @@ class _CharacterLevelUpTab extends ConsumerWidget {
             children: [
               const Text('📖', style: TextStyle(fontSize: 48)),
               const SizedBox(height: 12),
-              const Text('まだキャラクターがいないよ',
+              Text('まだキャラクターがいないよ',
                   style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: kTextDark)),
+                      color: context.strongText)),
               const SizedBox(height: 8),
-              const Text('クイズをといてキャラクターをゲットしよう！',
-                  style: TextStyle(color: kTextMuted, fontSize: 13),
+              Text('クイズをといてキャラクターをゲットしよう！',
+                  style: TextStyle(color: context.mutedText, fontSize: 13),
                   textAlign: TextAlign.center),
               const SizedBox(height: 20),
               ElevatedButton(
@@ -202,18 +205,17 @@ class _KokugoLevelUpCard extends ConsumerWidget {
                 else
                   Padding(
                       padding: const EdgeInsets.all(4),
-                      child: Text(character.emoji,
-                          style: const TextStyle(fontSize: 40))),
+                      child: UkalabEmoji(character.emoji, size: 40)),
                 if (state.hasSparkle)
                   const Text('✨', style: TextStyle(fontSize: 12)),
               ],
             ),
             const SizedBox(height: 4),
             Text(character.name,
-                style: const TextStyle(
+                style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
-                    color: kTextDark),
+                    color: context.strongText),
                 textAlign: TextAlign.center),
             const SizedBox(height: 4),
             Row(
@@ -227,7 +229,7 @@ class _KokugoLevelUpCard extends ConsumerWidget {
                   decoration: BoxDecoration(
                     color: i < state.level
                         ? Colors.amber
-                        : Colors.grey.shade300,
+                        : context.dotOffColor,
                     borderRadius: BorderRadius.circular(3),
                   ),
                 ),
@@ -239,7 +241,7 @@ class _KokugoLevelUpCard extends ConsumerWidget {
                     fontSize: 11,
                     color: state.isMaxLevel
                         ? Colors.amber.shade700
-                        : kTextMuted,
+                        : context.mutedText,
                     fontWeight: state.isMaxLevel
                         ? FontWeight.bold
                         : FontWeight.normal)),
@@ -313,9 +315,10 @@ class _KokugoLevelUpCard extends ConsumerWidget {
                               .read(characterStateProvider.notifier)
                               .levelUp(character.id);
                           if (error == null) {
-                            await ref
-                                .read(featuredCharacterProvider.notifier)
-                                .setFeatured(character.id);
+                            // TODO: Integrate featuredCharacterProvider from Phase 4
+                            // await ref
+                            //     .read(featuredCharacterProvider.notifier)
+                            //     .setFeatured(character.id);
                           }
                           if (ctx.mounted) {
                             Navigator.pop(ctx);
@@ -370,10 +373,8 @@ class _ExchangeTab extends ConsumerWidget {
               final owned = purchased.ownedItemIds.contains(item.id);
               final canAfford = coins >= item.coinCost;
               final equippable = owned && _isEquippable(item);
-              final equipped = equippable
-                  ? ref.watch(equippedItemsProvider
-                      .select((s) => s.equippedByCategory[item.category] == item.id))
-                  : false;
+              // TODO: Integrate equippedItemsProvider from shared_core
+              final equipped = false; // equippable ? ref.watch(...) : false;
               return ListTile(
                 leading: item.assetPath != null
                     ? SizedBox(
@@ -381,7 +382,7 @@ class _ExchangeTab extends ConsumerWidget {
                         height: 28,
                         child: SvgPicture.asset(item.assetPath!, fit: BoxFit.contain),
                       )
-                    : Text(item.emoji, style: const TextStyle(fontSize: 28)),
+                    : UkalabEmoji(item.emoji, size: 28),
                 title: Text(item.name),
                 subtitle: Text(item.description, maxLines: 1, overflow: TextOverflow.ellipsis),
                 trailing: owned
@@ -492,7 +493,7 @@ class _SeasonalTab extends ConsumerWidget {
         else
           ...items.map((item) {
             return ListTile(
-              leading: Text(item.emoji, style: const TextStyle(fontSize: 28)),
+              leading: UkalabEmoji(item.emoji, size: 28),
               title: Text(item.name),
               subtitle: Text(item.description, maxLines: 1, overflow: TextOverflow.ellipsis),
             );
@@ -576,14 +577,14 @@ class _AvatarTab extends ConsumerWidget {
               const SizedBox(height: 24),
             ],
           ),
-        const Text('🔒 ロック中',
-            style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: kTextDark)),
+        Text('🔒 ロック中',
+            style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: context.strongText)),
         const SizedBox(height: 8),
         if (locked.isEmpty)
-          const Padding(
-            padding: EdgeInsets.all(16),
+          Padding(
+            padding: const EdgeInsets.all(16),
             child: Center(
-              child: Text('すべてのアバターをゲットしました！', style: TextStyle(color: kTextMuted)),
+              child: Text('すべてのアバターをゲットしました！', style: TextStyle(color: context.mutedText)),
             ),
           )
         else
@@ -617,7 +618,10 @@ class _AvatarTab extends ConsumerWidget {
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      AvatarImage(avatar: avatar, size: 44, opacity: 0.4),
+                      Opacity(
+                        opacity: 0.4,
+                        child: AvatarImage(avatar: avatar, size: 44),
+                      ),
                       Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -677,6 +681,8 @@ class _AvatarTab extends ConsumerWidget {
                 await ref.read(purchasedItemsProvider.notifier).purchase(avatar.id);
                 // shared_core の avatarProvider にも通知（共存性のため）
                 await ref.read(avatarProvider.notifier).unlockWithCoins(avatar.id);
+                // 購入直後に解放状態を反映（次回起動を待たずに使えるように）
+                ref.read(avatarUnlockProvider.notifier).refreshUnlockStatus();
                 Navigator.pop(ctx);
                 ScaffoldMessenger.of(ctx).showSnackBar(
                   SnackBar(
@@ -717,12 +723,13 @@ class _EquipButton extends ConsumerWidget {
       width: 90,
       child: ElevatedButton(
         onPressed: () {
-          final notifier = ref.read(equippedItemsProvider.notifier);
-          if (equipped) {
-            notifier.unequip(item.category);
-          } else {
-            notifier.equip(item.category, item.id);
-          }
+          // TODO: Integrate equippedItemsProvider from shared_core
+          // final notifier = ref.read(equippedItemsProvider.notifier);
+          // if (equipped) {
+          //   notifier.unequip(item.category);
+          // } else {
+          //   notifier.equip(item.category, item.id);
+          // }
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: equipped ? Colors.grey.shade300 : kPrimaryColor,
