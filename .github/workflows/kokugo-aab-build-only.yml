@@ -114,6 +114,8 @@ jobs:
           JAVA_HOME: ${{ env.JAVA_HOME }}
           KEYSTORE_PASSWORD: ${{ env.KEYSTORE_PASSWORD != '' && env.KEYSTORE_PASSWORD || secrets.KEYSTORE_PASSWORD }}
           KEY_PASSWORD: ${{ env.KEY_PASSWORD != '' && env.KEY_PASSWORD || secrets.KEY_PASSWORD }}
+          # Secret Manager の出力は GitHub の仕様で捨てられるため、リポジトリの Secret にも逃がす
+          REVENUECAT_API_KEY: ${{ env.REVENUECAT_API_KEY != '' && env.REVENUECAT_API_KEY || secrets.REVENUECAT_API_KEY }}
         run: |
           cd K:/
           flutter build appbundle --release --no-pub `
