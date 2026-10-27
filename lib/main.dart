@@ -14,6 +14,7 @@ import 'package:shared_core/shared_core.dart'
         characterStateProvider,
         equippedItemsProvider,
         screenTimeProvider,
+        ScreenTimeLimitReachedWidget,
         coinProvider,
         avatarProvider,
         badgeProvider,
@@ -482,12 +483,14 @@ class _RootShellState extends ConsumerState<RootShell> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Phase 4 - screenTimeProvider not implemented
-    // ref.watch(screenTimeProvider);
-    // final isLimitReached = ref.read(screenTimeProvider.notifier).isLimitReached;
-    // if (isLimitReached) {
-    //   return const ScreenTimeLimitReachedWidget(primaryColor: kPrimaryColor);
-    // }
+    // 利用時間制限(スクリーンタイム管理): 1日の上限に達していれば、タブ操作より優先して
+    // 全画面オーバーレイを表示する。ref.watch で状態変化(1分ごとの加算・保護者による
+    // 一時解除)を反映させたうえで、判定は notifier.isLimitReached に委ねる(社会・プログラミングと同じ)。
+    ref.watch(screenTimeProvider);
+    final isLimitReached = ref.read(screenTimeProvider.notifier).isLimitReached;
+    if (isLimitReached) {
+      return const ScreenTimeLimitReachedWidget(primaryColor: kPrimaryColor);
+    }
     return Scaffold(
       body: IndexedStack(
         index: _tab,
