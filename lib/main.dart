@@ -1,4 +1,5 @@
-﻿import 'package:cross_promo_kit/cross_promo_kit.dart'
+﻿import 'services/app_analytics.dart';
+import 'package:cross_promo_kit/cross_promo_kit.dart'
     show CrossPromoService;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -305,6 +306,7 @@ class KokugoKoreApp extends ConsumerWidget {
       themeMode: ThemeMode.system,
       debugShowCheckedModeBanner: false,
       builder: (context, child) => DecorBackdrop(child: child ?? const SizedBox.shrink()),
+      navigatorObservers: [AppAnalytics.observer],
       initialRoute: '/',
       routes: {
         '/': (context) => const SplashScreen(),
