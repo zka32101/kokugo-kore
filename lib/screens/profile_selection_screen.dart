@@ -175,7 +175,7 @@ class _ProfileSelectionScreenState extends ConsumerState<ProfileSelectionScreen>
                           ],
                         ),
                           if (!isUnlocked)
-                            Text('${avatar.coinCost ?? 0}コイン',
+                            Text(avatar.coinCost == null ? 'プレミアム' : '${avatar.coinCost}コイン',
                                 style: const TextStyle(fontSize: 9, color: Colors.grey))
                           else
                             const SizedBox(height: 11),
