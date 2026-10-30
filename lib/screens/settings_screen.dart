@@ -16,6 +16,8 @@ import 'package:shared_core/shared_core.dart'
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../data/kana_data.dart';
+import '../features/settings/widgets/reminder_switch.dart';
+import '../features/settings/widgets/study_window_tile.dart';
 import '../providers/drawing_progress_provider.dart';
 import '../providers/coin_provider.dart';
 import '../providers/referral_provider.dart';
@@ -296,6 +298,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> with TickerProv
           ),
           const Divider(),
           _SectionHeader(title: '🔔 通知設定'),
+          const ReminderSwitchTile(),
+          const StudyWindowTile(),
           ListTile(
             leading: const Text('🔔', style: TextStyle(fontSize: 20)),
             title: const Text('通知設定を変更'),

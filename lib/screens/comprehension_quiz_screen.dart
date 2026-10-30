@@ -7,6 +7,7 @@ import '../providers/coin_provider.dart';
 import '../theme/app_theme.dart';
 import '../utils/shuffle_choices.dart';
 import 'summary_training_screen.dart';
+import '../services/retention_hooks.dart' show onQuizAnswered;
 
 class ComprehensionQuizScreen extends ConsumerStatefulWidget {
   final String passageId;
@@ -367,10 +368,15 @@ class _ComprehensionQuizScreenState extends ConsumerState<ComprehensionQuizScree
 
   void _submitAnswer() {
     final current = _quiz[_currentQuestion];
-    if (_selectedAnswer == current.correctAnswer) {
+    final correct = _selectedAnswer == current.correctAnswer;
+    if (correct) {
       _correctCount++;
     }
     setState(() => _answered = true);
+    onQuizAnswered(ref,
+        quizId: 'comp_${current.questionId}',
+        correct: correct,
+        context: context);
   }
 
   void _goToNextQuestion() {
