@@ -96,6 +96,7 @@ import 'screens/goal_setting_screen.dart';
 import 'screens/yojijukugo_quiz_screen.dart';
 import 'screens/synonym_antonym_quiz_screen.dart';
 import 'services/kokugo_purchase_service.dart';
+import 'services/retention_hooks.dart';
 import 'widgets/premium_gate.dart';
 import 'features/shop/decor/decor_scope.dart';
 
@@ -287,6 +288,9 @@ Future<void> main() async {
 //     }
 //   }
 // 
+  // 定着率施策（初回7日間・復習キュー・週次チャレンジ等）の保存データを読み込む
+  await initRetention(container);
+
   runApp(UncontrolledProviderScope(
     container: container,
     child: const KokugoKoreApp(),

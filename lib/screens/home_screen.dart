@@ -39,6 +39,7 @@ import 'package:shared_core/shared_core.dart'
 import '../widgets/daily_bonus_dialog.dart';
 import '../widgets/title_plate.dart';
 import '../features/shop/title/title_provider.dart';
+import '../features/home/widgets/retention_section.dart';
 import '../widgets/daily_mission_card.dart';
 import '../widgets/timer_chip_widget.dart';
 import '../widgets/badge_progress_tracker.dart';
@@ -415,6 +416,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               onStartStage: (stage) {
                 Navigator.of(context).pushNamed('/quest', arguments: stage);
               },
+            ),
+          ),
+          // 定着率施策（初回7日間ごほうび・週次チャレンジ）
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: RetentionSection(),
             ),
           ),
           // Phase 4.20: 週次ボーナスシステム

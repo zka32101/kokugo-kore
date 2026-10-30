@@ -7,6 +7,7 @@ import '../providers/vocab_mastery_provider.dart';
 import '../providers/premium_provider.dart';
 import '../theme/app_theme.dart';
 import '../utils/shuffle_choices.dart';
+import '../services/retention_hooks.dart' show onQuizAnswered;
 
 class VocabQuestion {
   final String word;
@@ -1211,6 +1212,10 @@ class _VocabularyScreenState extends ConsumerState<VocabularyScreen>
       }
     });
     _feedbackCtrl.forward(from: 0);
+    onQuizAnswered(ref,
+        quizId: 'vocab_${_current.original.word}',
+        correct: _isCorrect,
+        context: context);
   }
 
   void _onNext() {

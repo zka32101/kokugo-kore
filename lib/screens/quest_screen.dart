@@ -11,6 +11,7 @@ import '../providers/progress_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/premium_gate.dart';
 import '../services/firebase_service.dart' show FirebaseService;
+import '../services/retention_hooks.dart' show onQuizAnswered;
 
 class QuestScreen extends ConsumerStatefulWidget {
   final Stage stage;
@@ -78,6 +79,8 @@ class _QuestScreenState extends ConsumerState<QuestScreen>
       if (_isCorrect) _correctCount++;
     });
     _feedbackCtrl.forward(from: 0);
+    onQuizAnswered(ref,
+        quizId: _current.id, correct: _isCorrect, context: context);
   }
 
   Future<void> _onNext() async {

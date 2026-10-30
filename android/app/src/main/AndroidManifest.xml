@@ -7,6 +7,8 @@
     <!-- Google Play Billing（in_app_purchase_android は自身のマニフェストで
          この権限を宣言しないため、アプリ側での宣言が必須） -->
     <uses-permission android:name="com.android.vending.BILLING"/>
+    <!-- 学習リマインダー（ローカル通知）。保護者ゲート後に許可を求める -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <!-- 広告なしアプリ: 依存ライブラリ(Firebase等)が自動で足す広告ID関連の権限を外す。
          残すとPlay Consoleの広告ID申告(いいえ)と矛盾して審査送信がブロックされる -->

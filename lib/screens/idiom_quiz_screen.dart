@@ -8,6 +8,7 @@ import '../theme/app_theme.dart';
 import '../widgets/explanation_image.dart';
 import '../utils/shuffle_choices.dart';
 import 'proverb_quiz_screen.dart' show QuizChoiceButton;
+import '../services/retention_hooks.dart' show onQuizAnswered;
 
 class IdiomQuestion {
   final String idiom;
@@ -517,6 +518,10 @@ class _IdiomQuizScreenState extends ConsumerState<IdiomQuizScreen>
       if (_isCorrect) _score++;
     });
     _feedbackCtrl.forward(from: 0);
+    onQuizAnswered(ref,
+        quizId: 'idiom_${_current.idiom}',
+        correct: _isCorrect,
+        context: context);
   }
 
   void _onNext() {

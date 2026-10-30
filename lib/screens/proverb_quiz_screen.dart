@@ -7,6 +7,7 @@ import '../providers/premium_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/explanation_image.dart';
 import '../utils/shuffle_choices.dart';
+import '../services/retention_hooks.dart' show onQuizAnswered;
 
 class ProverbQuestion {
   final String proverb;
@@ -515,6 +516,10 @@ class _ProverbQuizScreenState extends ConsumerState<ProverbQuizScreen>
       if (_isCorrect) _score++;
     });
     _feedbackCtrl.forward(from: 0);
+    onQuizAnswered(ref,
+        quizId: 'proverb_${_current.proverb}',
+        correct: _isCorrect,
+        context: context);
   }
 
   void _onNext() {
