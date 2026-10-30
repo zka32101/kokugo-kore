@@ -38,6 +38,16 @@ import 'package:kokugo_kore/widgets/ukalab_emoji.dart';
 const _appVersion = AppConstants.appVersion;
 
 const _changelog = <String, List<String>>{
+  '1.5.4': [
+    '起動がネットワークの待ちで止まらないように修正',
+  ],
+  '1.5.3': [
+    '広告の機能を削除し、広告IDを使わない構成に変更',
+  ],
+  '1.5.2': [
+    '選択肢の位置がシャッフルされるように修正',
+    'キャラクターの詳細で、レベルごとの画像が正しく出るように修正',
+  ],
   '1.5.1': [
     'かく練習の採点を、お手本の字の形との一致で判定するように変更',
     'プロフィール追加で、無料の4種類のアイコンを選べるように修正',
