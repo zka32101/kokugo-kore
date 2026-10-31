@@ -38,6 +38,10 @@ import 'package:kokugo_kore/widgets/ukalab_emoji.dart';
 const _appVersion = AppConstants.appVersion;
 
 const _changelog = <String, List<String>>{
+  '1.5.5': [
+    'はじめての7日間ごほうび・今週のチャレンジを追加',
+    '利用状況の計測を追加(画面の遷移だけを記録。広告IDは集めません)',
+  ],
   '1.5.4': [
     '起動がネットワークの待ちで止まらないように修正',
   ],
